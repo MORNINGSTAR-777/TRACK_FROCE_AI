@@ -1,0 +1,892 @@
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{--ink:#0A1628;--ink-mid:#1A2E4A;--sky:#1E6FCC;--sky-bright:#2E85F0;--sky-pale:#EBF3FF;--sky-ghost:#F4F8FF;--mint:#0EAD7A;--mint-pale:#E6FAF4;--amber:#E8900A;--amber-pale:#FFF3DC;--crimson:#D42B2B;--crimson-pale:#FFE8E8;--violet:#7C3AED;--slate:#546E8A;--white:#FFFFFF;--surface:#F6F9FD;--surface-mid:#EDF2F8;--border:#DDE6F0;--border-strong:#C4D4E6;--text:#0A1628;--text-mid:#2D4263;--text-soft:#546E8A;--text-ghost:#8EABC5;--r-xs:6px;--r-sm:10px;--r-md:14px;--r-lg:18px;--r-xl:24px;--r-pill:999px;--sh-xs:0 1px 3px rgba(10,22,40,0.06);--sh-sm:0 2px 8px rgba(10,22,40,0.08),0 1px 3px rgba(10,22,40,0.04);--sh-md:0 4px 16px rgba(10,22,40,0.10);--sh-sky:0 4px 24px rgba(30,111,204,0.25);--sh-mint:0 4px 24px rgba(14,173,122,0.25);--sh-crimson:0 4px 24px rgba(212,43,43,0.25);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Sora',sans-serif;background:var(--surface);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;}
+.screen{display:none;}
+.screen.active{display:flex;}
+#loginScreen{min-height:100vh;background:linear-gradient(155deg,#050E1C 0%,#0C1F3D 45%,#0E2652 75%,#071630 100%);flex-direction:column;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;}
+#loginScreen::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(30,111,204,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(30,111,204,0.06) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;}
+.login-orb{position:absolute;border-radius:50%;pointer-events:none;}
+.login-orb-1{width:500px;height:500px;background:radial-gradient(circle,rgba(30,111,204,0.18) 0%,transparent 65%);top:-180px;right:-100px;}
+.login-orb-2{width:350px;height:350px;background:radial-gradient(circle,rgba(14,173,122,0.10) 0%,transparent 65%);bottom:-100px;left:-80px;}
+.login-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);backdrop-filter:blur(24px);border-radius:var(--r-xl);padding:40px 36px;width:100%;max-width:440px;position:relative;z-index:2;animation:loginFadeIn .5s ease;}
+@keyframes loginFadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.login-header{display:flex;align-items:center;gap:16px;margin-bottom:36px;}
+.login-emblem{width:54px;height:54px;background:linear-gradient(140deg,#1E6FCC 0%,#0EAD7A 100%);border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 6px 24px rgba(30,111,204,0.45);}
+.login-emblem svg{width:28px;height:28px;fill:white;}
+.login-brand h1{font-size:20px;font-weight:800;color:white;letter-spacing:-0.3px;line-height:1.1;}
+.login-brand p{font-size:11.5px;color:rgba(255,255,255,0.42);margin-top:3px;}
+.role-section-label{font-size:10.5px;font-weight:600;color:rgba(255,255,255,0.38);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;}
+.role-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:28px;}
+.role-card{background:rgba(255,255,255,0.045);border:1px solid rgba(255,255,255,0.10);border-radius:var(--r-md);padding:14px 8px;cursor:pointer;text-align:center;transition:all .22s;color:rgba(255,255,255,0.65);user-select:none;}
+.role-card:hover{background:rgba(255,255,255,0.09);border-color:rgba(255,255,255,0.20);color:white;}
+.role-card.active{background:rgba(30,111,204,0.22);border-color:rgba(46,133,240,0.55);color:white;}
+.role-card-icon{font-size:20px;margin-bottom:7px;display:block;}
+.role-card-name{font-size:11px;font-weight:600;}
+.login-form-fields{display:flex;flex-direction:column;gap:14px;}
+.form-field label{display:block;font-size:10.5px;font-weight:600;color:rgba(255,255,255,0.42);letter-spacing:.07em;text-transform:uppercase;margin-bottom:7px;}
+.form-field input{width:100%;background:rgba(255,255,255,0.065);border:1px solid rgba(255,255,255,0.11);border-radius:var(--r-sm);padding:13px 15px;color:white;font-size:14.5px;font-family:'Sora',sans-serif;outline:none;transition:border-color .2s;}
+.form-field input::placeholder{color:rgba(255,255,255,0.25);}
+.form-field input:focus{border-color:rgba(46,133,240,0.6);}
+.login-btn{width:100%;background:linear-gradient(135deg,#1E6FCC 0%,#1557A8 100%);color:white;border:none;border-radius:var(--r-sm);padding:14px;font-size:15px;font-weight:700;font-family:'Sora',sans-serif;cursor:pointer;transition:all .2s;box-shadow:var(--sh-sky);margin-top:6px;}
+.login-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(30,111,204,0.40);}
+.login-error{background:rgba(212,43,43,0.15);border:1px solid rgba(212,43,43,0.30);color:#FF8080;padding:10px 14px;border-radius:var(--r-xs);font-size:12.5px;display:none;margin-top:10px;}
+.login-error.show{display:block;}
+.login-footer{text-align:center;margin-top:22px;font-size:11.5px;color:rgba(255,255,255,0.25);}
+#appScreen{min-height:100vh;flex-direction:row;}
+.sidebar{width:230px;min-width:230px;background:var(--ink);display:flex;flex-direction:column;height:100vh;position:sticky;top:0;overflow-y:auto;z-index:50;}
+.sidebar-brand{padding:18px 16px 16px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:11px;}
+.sidebar-icon{width:34px;height:34px;background:linear-gradient(140deg,#1E6FCC,#0EAD7A);border-radius:9px;display:flex;align-items:center;justify-content:center;}
+.sidebar-icon svg{width:18px;height:18px;fill:white;}
+.sidebar-brand-text h2{font-size:13.5px;font-weight:800;color:white;}
+.sidebar-brand-text p{font-size:10px;color:rgba(255,255,255,0.35);}
+.sidebar-user{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.06);}
+.sidebar-user-row{display:flex;align-items:center;gap:10px;}
+.user-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;}
+.user-name{font-size:12.5px;font-weight:600;color:rgba(255,255,255,0.88);}
+.user-role-badge{font-size:10px;font-weight:600;color:rgba(255,255,255,0.40);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
+.sidebar-nav{flex:1;padding:14px 10px;display:flex;flex-direction:column;gap:2px;}
+.nav-section-label{font-size:9.5px;font-weight:700;color:rgba(255,255,255,0.22);letter-spacing:.10em;text-transform:uppercase;padding:10px 8px 6px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r-sm);cursor:pointer;transition:all .18s;color:rgba(255,255,255,0.52);font-size:13px;font-weight:500;position:relative;user-select:none;}
+.nav-item:hover{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.82);}
+.nav-item.active{background:rgba(30,111,204,0.20);color:#5BA8F5;}
+.nav-item.active::before{content:'';position:absolute;left:0;top:25%;bottom:25%;width:3px;background:#2E85F0;border-radius:0 3px 3px 0;}
+.nav-badge{margin-left:auto;background:var(--crimson);color:white;font-size:10px;font-weight:700;padding:2px 6px;border-radius:99px;min-width:18px;text-align:center;}
+.sidebar-footer{padding:12px 10px;border-top:1px solid rgba(255,255,255,0.06);}
+.sidebar-footer-btn{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r-sm);cursor:pointer;color:rgba(255,255,255,0.40);font-size:12.5px;transition:all .18s;background:none;border:none;width:100%;font-family:'Sora',sans-serif;}
+.sidebar-footer-btn:hover{background:rgba(212,43,43,0.12);color:#FF8080;}
+.main-area{flex:1;display:flex;flex-direction:column;min-height:100vh;overflow:hidden;}
+.topbar{height:58px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;flex-shrink:0;box-shadow:var(--sh-xs);}
+.topbar-title{font-size:17px;font-weight:700;color:var(--ink);}
+.topbar-sub{font-size:12px;color:var(--text-soft);margin-top:1px;}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.topbar-clock{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:var(--ink);background:var(--surface);border:1px solid var(--border);padding:5px 12px;border-radius:var(--r-xs);}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 3px rgba(14,173,122,0.22);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(14,173,122,0.22)}50%{box-shadow:0 0 0 6px rgba(14,173,122,0.08)}}
+.ws-status{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-soft);font-weight:500;}
+.pages{flex:1;overflow-y:auto;}
+.page{display:none;padding:24px;animation:pageIn .3s ease;}
+.page.active{display:block;}
+@keyframes pageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.card{background:white;border-radius:var(--r-lg);border:1px solid var(--border);box-shadow:var(--sh-xs);}
+.card-pad{padding:20px;}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--surface-mid);}
+.card-title{font-size:14px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px;}
+.card-body{padding:20px;}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-bottom:20px;}
+.stat-card{background:white;border-radius:var(--r-lg);border:1px solid var(--border);padding:18px 20px;box-shadow:var(--sh-xs);transition:box-shadow .2s,transform .2s;position:relative;overflow:hidden;}
+.stat-card:hover{box-shadow:var(--sh-md);transform:translateY(-2px);}
+.stat-card-accent{position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r-lg) var(--r-lg) 0 0;}
+.stat-label{font-size:11px;font-weight:600;color:var(--text-soft);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+.stat-value{font-size:30px;font-weight:800;color:var(--ink);line-height:1;letter-spacing:-1px;margin-bottom:6px;font-family:'JetBrains Mono',monospace;}
+.stat-trend{font-size:11.5px;color:var(--text-ghost);}
+.trend-up{color:var(--mint);}
+.trend-down{color:var(--crimson);}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:var(--r-sm);font-size:13px;font-weight:600;font-family:'Sora',sans-serif;cursor:pointer;border:none;transition:all .18s;letter-spacing:.01em;}
+.btn-primary{background:var(--sky);color:white;box-shadow:var(--sh-sky);}
+.btn-primary:hover{background:var(--sky-bright);transform:translateY(-1px);}
+.btn-ghost{background:var(--surface);color:var(--text-mid);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--surface-mid);}
+.btn-sm{padding:6px 12px;font-size:12px;}
+.tag{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:var(--r-pill);font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
+.tag-green{background:var(--mint-pale);color:#078056;}
+.tag-red{background:var(--crimson-pale);color:#A81F1F;}
+.tag-amber{background:var(--amber-pale);color:#9E5F00;}
+.tag-blue{background:var(--sky-pale);color:#134E99;}
+.tag-dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.section-title{font-size:16px;font-weight:700;color:var(--ink);}
+.section-sub{font-size:12px;color:var(--text-soft);margin-top:2px;}
+.map-container{position:relative;border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--border);box-shadow:var(--sh-md);}
+.map-legend{position:absolute;bottom:12px;left:12px;background:rgba(255,255,255,0.95);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 14px;box-shadow:var(--sh-sm);z-index:1000;display:flex;gap:14px;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--text-mid);}
+.legend-dot{width:10px;height:10px;border-radius:50%;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.alert-item{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-bottom:1px solid var(--surface-mid);transition:background .18s;}
+.alert-item:hover{background:var(--surface);}
+.alert-item:last-child{border-bottom:none;}
+.alert-icon{width:36px;height:36px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;flex-shrink:0;}
+.alert-icon-red{background:var(--crimson-pale);color:var(--crimson);}
+.alert-icon-amber{background:var(--amber-pale);color:var(--amber);}
+.alert-info h4{font-size:13px;font-weight:600;color:var(--ink);}
+.alert-info p{font-size:12px;color:var(--text-soft);margin-top:3px;}
+.alert-time{font-size:11px;color:var(--text-ghost);margin-top:4px;font-family:'JetBrains Mono',monospace;}
+.officer-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--surface-mid);transition:background .18s;}
+.officer-row:hover{background:var(--sky-ghost);}
+.officer-row:last-child{border-bottom:none;}
+.officer-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;}
+.officer-name{font-size:13.5px;font-weight:600;color:var(--ink);}
+.officer-id{font-size:11.5px;color:var(--text-soft);margin-top:1px;font-family:'JetBrains Mono',monospace;}
+.vip-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--surface-mid);}
+.vip-star{width:38px;height:38px;background:linear-gradient(135deg,var(--amber),#C47000);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:16px;color:white;}
+.vip-name{font-size:13.5px;font-weight:700;color:var(--ink);}
+.vip-route{font-size:12px;color:var(--text-soft);margin-top:2px;}
+.zone-toolbar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--ink);border-radius:var(--r-sm);margin-bottom:12px;}
+.zone-tool-btn{padding:6px 12px;border-radius:var(--r-xs);font-size:12px;font-weight:600;color:rgba(255,255,255,0.65);background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);cursor:pointer;font-family:'Sora',sans-serif;transition:all .18s;}
+.zone-tool-btn:hover,.zone-tool-btn.active-tool{background:rgba(30,111,204,0.35);border-color:rgba(46,133,240,0.5);color:white;}
+.modal-overlay{position:fixed;inset:0;background:rgba(10,22,40,0.55);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center;padding:24px;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:white;border-radius:var(--r-xl);width:100%;max-width:520px;box-shadow:var(--sh-lg);animation:modalIn .25s ease;}
+@keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border);}
+.modal-title{font-size:16px;font-weight:700;color:var(--ink);}
+.modal-close{width:30px;height:30px;border-radius:var(--r-xs);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-soft);font-size:18px;background:none;border:none;font-family:'Sora',sans-serif;}
+.modal-close:hover{background:var(--surface-mid);}
+.modal-body{padding:24px;display:flex;flex-direction:column;gap:14px;}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;padding:16px 24px;border-top:1px solid var(--border);}
+.input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 14px;font-size:13.5px;color:var(--text);outline:none;transition:border-color .2s;font-family:'Sora',sans-serif;}
+.input:focus{border-color:var(--sky);box-shadow:0 0 0 3px rgba(30,111,204,0.10);}
+.input-label{display:block;font-size:11.5px;font-weight:600;color:var(--text-soft);margin-bottom:7px;}
+.checkin-btn{width:100%;border-radius:var(--r-lg);padding:18px;font-size:17px;font-weight:800;border:none;cursor:pointer;font-family:'Sora',sans-serif;transition:all .2s;position:relative;overflow:hidden;}
+.zone-status-card{border-radius:var(--r-lg);padding:22px;margin-bottom:16px;position:relative;overflow:hidden;color:white;}
+.zone-indicator{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 20px;border-radius:var(--r-pill);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-top:12px;}
+#constableView{max-width:420px;margin:0 auto;}
+.analytics-bar-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--surface-mid);}
+.analytics-bar-label{font-size:12.5px;color:var(--text-mid);font-weight:500;min-width:140px;}
+.analytics-bar-track{flex:1;height:8px;background:var(--surface-mid);border-radius:99px;overflow:hidden;}
+.analytics-bar-fill{height:100%;border-radius:99px;background:var(--sky);transition:width .6s ease;}
+.analytics-bar-val{font-size:12.5px;font-weight:700;color:var(--ink);font-family:'JetBrains Mono',monospace;min-width:36px;text-align:right;}
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.offline-banner{position:fixed;bottom:0;left:0;right:0;background:var(--ink);color:white;text-align:center;padding:10px;font-size:13px;font-weight:600;z-index:500;display:none;}
+.offline-banner.show{display:block;}
+.mono{font-family:'JetBrains Mono',monospace;}
+.gps-info-bar{position:absolute;bottom:12px;right:12px;background:rgba(10,22,40,0.85);color:white;padding:6px 12px;border-radius:var(--r-sm);font-size:11px;font-family:'JetBrains Mono',monospace;z-index:1000;backdrop-filter:blur(4px);}
+@media(max-width:768px){.sidebar{position:fixed;left:-100%;transition:left .3s ease;}.sidebar.open{left:0;}.main-area{width:100%;}.stats-grid{grid-template-columns:1fr 1fr;}.grid-2,.grid-3{grid-template-columns:1fr;}}
+.leaflet-popup-content-wrapper{border-radius:10px!important;box-shadow:var(--sh-md)!important;border:1px solid var(--border)!important;}
+.leaflet-popup-content{font-family:'Sora',sans-serif!important;font-size:13px!important;}
+</style>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="screen active">
+  <div class="login-orb login-orb-1"></div>
+  <div class="login-orb login-orb-2"></div>
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-emblem"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></div>
+      <div class="login-brand"><h1>Bandobusth.AI</h1><p>Anantapur District Police — Real-Time Command</p></div>
+    </div>
+    <div class="role-section-label">Select Your Role</div>
+    <div class="role-selector" id="roleSelector">
+      <div class="role-card active" data-role="admin" onclick="selectRole('admin')"><span class="role-card-icon">🛡️</span><div class="role-card-name">Head Admin</div></div>
+      <div class="role-card" data-role="officer" onclick="selectRole('officer')"><span class="role-card-icon">🖥️</span><div class="role-card-name">Zone Officer</div></div>
+      <div class="role-card" data-role="constable" onclick="selectRole('constable')"><span class="role-card-icon">👮</span><div class="role-card-name">Constable</div></div>
+    </div>
+    <div class="login-form-fields">
+      <div class="form-field"><label>Police ID</label><input type="text" id="loginPoliceId" placeholder="AP-XXXX-XXXX"></div>
+      <div class="form-field"><label>Password</label><input type="password" id="loginPassword" placeholder="Enter password" onkeydown="if(event.key==='Enter')handleLogin()"></div>
+    </div>
+    <div class="login-error" id="loginError">Invalid credentials.</div>
+    <button class="login-btn" id="loginBtn" onclick="handleLogin()">Sign In to Dashboard</button>
+    <div class="login-footer">Anantapur District Police — Secure Access | v2.0</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appScreen" class="screen">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-icon"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></div>
+      <div class="sidebar-brand-text"><h2>Bandobusth.AI</h2><p>Command Center</p></div>
+    </div>
+    <div class="sidebar-user">
+      <div class="sidebar-user-row">
+        <div class="user-avatar" id="sidebarAvatar" style="background:#1E6FCC">H</div>
+        <div><div class="user-name" id="sidebarName">Loading...</div><div class="user-role-badge" id="sidebarRole">Head Admin</div></div>
+      </div>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav"></nav>
+    <div class="sidebar-footer">
+      <button class="sidebar-footer-btn" onclick="handleLogout()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <div class="topbar">
+      <div><div class="topbar-title" id="topbarTitle">Dashboard</div><div class="topbar-sub">Anantapur District Police</div></div>
+      <div class="topbar-right">
+        <div class="ws-status"><div class="status-dot" id="wsDot"></div><span id="wsText">Live</span></div>
+        <div class="topbar-clock mono" id="topbarClock">--:--:--</div>
+      </div>
+    </div>
+
+    <div class="pages" id="pages">
+
+      <!-- ADMIN DASHBOARD -->
+      <div class="page" id="page-admin-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-card-accent" style="background:var(--sky)"></div><div class="stat-label">Active Constables</div><div class="stat-value" id="stat-active">5</div><div class="stat-trend trend-up">On duty now</div></div>
+          <div class="stat-card"><div class="stat-card-accent" style="background:var(--mint)"></div><div class="stat-label">Inside Zone</div><div class="stat-value" id="stat-inzone">4</div><div class="stat-trend">Compliant</div></div>
+          <div class="stat-card"><div class="stat-card-accent" style="background:var(--crimson)"></div><div class="stat-label">Violations Today</div><div class="stat-value" id="stat-violations">1</div><div class="stat-trend trend-down">Geofence exits</div></div>
+          <div class="stat-card"><div class="stat-card-accent" style="background:var(--amber)"></div><div class="stat-label">Active Zones</div><div class="stat-value">3</div><div class="stat-trend">District coverage</div></div>
+          <div class="stat-card"><div class="stat-card-accent" style="background:var(--violet)"></div><div class="stat-label">Pending Alerts</div><div class="stat-value">2</div><div class="stat-trend">Unacknowledged</div></div>
+          <div class="stat-card"><div class="stat-card-accent" style="background:var(--slate)"></div><div class="stat-label">Avg Discipline</div><div class="stat-value">84</div><div class="stat-trend">District average</div></div>
+        </div>
+        <div class="grid-2" style="gap:16px">
+          <div>
+            <div class="section-header">
+              <div><div class="section-title">Master Map — All Zones</div><div class="section-sub">Live constable positions across Anantapur</div></div>
+              <button class="btn btn-ghost btn-sm" onclick="refreshMasterMap()">⟳ Refresh</button>
+            </div>
+            <div class="map-container" style="height:420px">
+              <div id="masterMap" style="width:100%;height:100%;"></div>
+              <div class="map-legend">
+                <div class="legend-item"><div class="legend-dot" style="background:var(--mint)"></div>In Zone</div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--crimson)"></div>Violation</div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Offline</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="section-header"><div class="section-title">Live Alerts</div><span class="tag tag-red" id="alertCountBadge">2 Active</span></div>
+            <div class="card" id="alertsFeedAdmin" style="max-height:420px;overflow-y:auto">
+              <div class="alert-item"><div class="alert-icon alert-icon-red">!</div><div class="alert-info"><h4>Cst. Nagarjuna — Zone Exit</h4><p>Officer exited Old Town Zone C (38m outside)</p><div class="alert-time">7m ago</div></div><div style="margin-left:auto"><button class="btn btn-ghost btn-sm" onclick="ackAlert(this)">Ack</button></div></div>
+              <div class="alert-item"><div class="alert-icon alert-icon-amber">T</div><div class="alert-info"><h4>Cst. Subrahmanyam — Late Arrival</h4><p>Late check-in — 23 minutes past shift start</p><div class="alert-time">15m ago</div></div><div style="margin-left:auto"><button class="btn btn-ghost btn-sm" onclick="ackAlert(this)">Ack</button></div></div>
+            </div>
+            <div style="margin-top:14px">
+              <div class="section-header"><div class="section-title">Personnel Status</div></div>
+              <div class="card" id="allPersonnelList" style="max-height:280px;overflow-y:auto"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN ZONES -->
+      <div class="page" id="page-admin-zones">
+        <div class="section-header">
+          <div><div class="section-title">Zone Management</div><div class="section-sub">Draw and assign patrol zones</div></div>
+          <button class="btn btn-primary" onclick="document.getElementById('addZoneModal').classList.add('open')">+ Add Zone</button>
+        </div>
+        <div class="grid-2" style="gap:16px">
+          <div>
+            <div class="zone-toolbar">
+              <span style="color:rgba(255,255,255,0.55);font-size:11.5px;font-weight:600;margin-right:4px">TOOLS:</span>
+              <button class="zone-tool-btn active-tool" onclick="setZoneTool('select',this)">Select</button>
+              <button class="zone-tool-btn" onclick="setZoneTool('circle',this)">Circle Zone</button>
+              <button class="zone-tool-btn" onclick="removeLastZone()" style="margin-left:auto;color:#FF8080">Delete Last</button>
+            </div>
+            <div class="map-container" style="height:460px">
+              <div id="zoneMap" style="width:100%;height:100%;"></div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">Configured Zones</div><span class="tag tag-blue" id="zoneCount">3 Zones</span></div>
+              <div id="zoneListAdmin" style="max-height:200px;overflow-y:auto"></div>
+            </div>
+            <div class="card" style="margin-top:14px">
+              <div class="card-header"><div class="card-title">Assign Constable to Zone</div></div>
+              <div class="card-body">
+                <div style="margin-bottom:12px"><label class="input-label">Select Zone</label>
+                  <select class="input" id="assignZoneSelect"><option>Market Area — Zone A</option><option>Bus Stand — Zone B</option><option>Old Town — Zone C</option></select></div>
+                <div style="margin-bottom:14px"><label class="input-label">Select Constable</label>
+                  <select class="input" id="assignConstableSelect"><option>Cst. Balakrishna (AP-CONST-0101)</option><option>Cst. Venkatesh (AP-CONST-0102)</option><option>Cst. Nagarjuna (AP-CONST-0103)</option></select></div>
+                <button class="btn btn-primary" style="width:100%" onclick="alert('Constable assigned!')">Assign Constable</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIP -->
+      <div class="page" id="page-admin-vip">
+        <div class="section-header">
+          <div><div class="section-title">VIP Movement Tracking</div><div class="section-sub">Real-time VIP route monitoring</div></div>
+          <button class="btn btn-primary" onclick="document.getElementById('addVIPModal').classList.add('open')">+ Add VIP</button>
+        </div>
+        <div class="grid-2" style="gap:16px;margin-bottom:20px">
+          <div class="map-container" style="height:400px">
+            <div id="vipMap" style="width:100%;height:100%;"></div>
+            <div class="map-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--amber);border-radius:2px"></div>VIP Vehicle</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--mint)"></div>Secure Zone</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Active VIP Movements</div><span class="tag tag-amber" id="vipCount">1 Active</span></div>
+            <div class="vip-row"><div class="vip-star">★</div><div><div class="vip-name">District Collector</div><div class="vip-route">Collectorate → Circuit House | AP-39-Z-0001</div></div><div style="margin-left:auto"><span class="tag tag-amber">Z+</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANALYTICS -->
+      <div class="page" id="page-admin-analytics">
+        <div class="section-header"><div class="section-title">Analytics & Performance</div></div>
+        <div class="stats-grid" style="margin-bottom:24px">
+          <div class="stat-card"><div class="stat-card-accent" style="background:var(--mint)"></div><div class="stat-label">Avg Discipline</div><div class="stat-value">84</div><div class="stat-trend">Out of 100</div></div>
+          <div class="stat-card"><div class="stat-card-accent" style="background:var(--sky)"></div><div class="stat-label">Attendance Rate</div><div class="stat-value">96%</div><div class="stat-trend">Today</div></div>
+          <div class="stat-card"><div class="stat-card-accent" style="background:var(--crimson)"></div><div class="stat-label">Total Violations</div><div class="stat-value">3</div><div class="stat-trend">This month</div></div>
+          <div class="stat-card"><div class="stat-card-accent" style="background:var(--amber)"></div><div class="stat-label">GPS Off Incidents</div><div class="stat-value">0</div><div class="stat-trend">Tampering attempts</div></div>
+        </div>
+        <div class="grid-2" style="gap:16px">
+          <div class="card"><div class="card-header"><div class="card-title">Performance by Zone</div></div><div class="card-body" id="zonePerf"></div></div>
+          <div class="card"><div class="card-header"><div class="card-title">Top Performers</div></div><div id="topPerf" style="max-height:300px;overflow-y:auto"></div></div>
+        </div>
+      </div>
+
+      <!-- OFFICER DASHBOARD -->
+      <div class="page" id="page-officer-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-card-accent" style="background:var(--sky)"></div><div class="stat-label">My Constables</div><div class="stat-value">4</div></div>
+          <div class="stat-card"><div class="stat-card-accent" style="background:var(--mint)"></div><div class="stat-label">In Zone</div><div class="stat-value">3</div></div>
+          <div class="stat-card"><div class="stat-card-accent" style="background:var(--crimson)"></div><div class="stat-label">Violations</div><div class="stat-value">1</div></div>
+          <div class="stat-card"><div class="stat-card-accent" style="background:var(--amber)"></div><div class="stat-label">Alerts Today</div><div class="stat-value">2</div></div>
+        </div>
+        <div class="grid-2" style="gap:16px">
+          <div>
+            <div class="section-header"><div class="section-title">Zone Map</div></div>
+            <div class="map-container" style="height:420px">
+              <div id="officerMap" style="width:100%;height:100%;"></div>
+              <div class="map-legend">
+                <div class="legend-item"><div class="legend-dot" style="background:var(--mint)"></div>In Zone</div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--crimson)"></div>Violation</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="section-header"><div class="section-title">My Constables</div></div>
+            <div class="card" id="officerConstableList" style="max-height:420px;overflow-y:auto"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONSTABLE DASHBOARD -->
+      <div class="page" id="page-constable-dashboard">
+        <div id="constableView">
+          <div class="zone-status-card" id="zoneStatusCard" style="background:linear-gradient(135deg,#1E6FCC,#1355A8);margin-bottom:16px">
+            <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Assigned Zone</div>
+            <div style="font-size:22px;font-weight:800;color:white;margin-bottom:4px" id="constableZoneName">Market Area — Zone A</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.75)" id="constableOfficerName">Zone Officer: Inspector Suresh</div>
+            <div class="zone-indicator" id="zoneIndicator" style="background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.85)">
+              <span id="zoneIndicatorText">GPS Acquiring...</span>
+            </div>
+          </div>
+          <div class="grid-2" style="margin-bottom:16px">
+            <div class="card card-pad" style="text-align:center"><div class="stat-label">Status</div><div style="font-size:15px;font-weight:800" id="constableStatus">OFF DUTY</div></div>
+            <div class="card card-pad" style="text-align:center"><div class="stat-label">Time on Duty</div><div class="mono" style="font-size:17px;font-weight:700" id="constableDuration">--:--:--</div></div>
+          </div>
+          <button class="checkin-btn" id="checkInBtn" onclick="handleConstableCheckIn()" style="background:linear-gradient(135deg,#0EAD7A,#087A55);color:white;margin-bottom:14px;box-shadow:var(--sh-mint)">CHECK IN — Start Duty</button>
+          <!-- Live GPS map for constable -->
+          <div class="card" style="margin-bottom:14px">
+            <div class="card-header"><div class="card-title">📍 My Live Location</div></div>
+            <div class="map-container" style="height:250px;border-radius:0 0 var(--r-lg) var(--r-lg);border:none">
+              <div id="constableMap" style="width:100%;height:100%;"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Duty Log</div></div>
+            <div class="card-body">
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;justify-content:space-between"><span style="color:var(--text-soft)">Check-in Time</span><span id="logCheckIn" class="mono" style="font-weight:600">--:--</span></div>
+                <div style="display:flex;justify-content:space-between"><span style="color:var(--text-soft)">Violations Today</span><span id="logViolations" style="font-weight:700;color:var(--crimson)">0</span></div>
+                <div style="display:flex;justify-content:space-between"><span style="color:var(--text-soft)">Location Updates</span><span id="logUpdates" style="font-weight:600">0</span></div>
+                <div style="display:flex;justify-content:space-between"><span style="color:var(--text-soft)">Discipline Score</span><span id="logScore" style="font-weight:700;color:var(--mint)">88/100</span></div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:12px;text-align:center;font-size:11.5px;color:var(--text-ghost)" id="constableGPSStatus">GPS: Inactive</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="addZoneModal">
+  <div class="modal-box">
+    <div class="modal-header"><div class="modal-title">Configure New Zone</div><button class="modal-close" onclick="closeModal('addZoneModal')">✕</button></div>
+    <div class="modal-body">
+      <div><label class="input-label">Zone Name</label><input class="input" type="text" id="newZoneName" placeholder="e.g. Market Area, Bus Stand..."></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label class="input-label">Center Latitude</label><input class="input" type="number" id="newZoneLat" value="14.6819" step="0.0001"></div>
+        <div><label class="input-label">Center Longitude</label><input class="input" type="number" id="newZoneLng" value="77.6006" step="0.0001"></div>
+      </div>
+      <div><label class="input-label">Radius (meters)</label><input class="input" type="number" id="newZoneRadius" value="500" min="100" max="5000"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('addZoneModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createZone()">Create Zone</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="addVIPModal">
+  <div class="modal-box">
+    <div class="modal-header"><div class="modal-title">Add VIP Movement</div><button class="modal-close" onclick="closeModal('addVIPModal')">✕</button></div>
+    <div class="modal-body">
+      <div><label class="input-label">VIP Name / Designation</label><input class="input" type="text" id="vipName" placeholder="e.g. District Collector"></div>
+      <div><label class="input-label">Vehicle Number</label><input class="input" type="text" id="vipVehicle" placeholder="AP-XXXX-XXXX"></div>
+      <div><label class="input-label">Security Level</label><select class="input" id="vipLevel"><option>Z+</option><option>Z</option><option>Y+</option><option>Y</option></select></div>
+      <div><label class="input-label">Route Description</label><input class="input" type="text" id="vipRoute" placeholder="e.g. Collectorate to Circuit House"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('addVIPModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addVIP()">Add VIP</button>
+    </div>
+  </div>
+</div>
+
+<div class="offline-banner" id="offlineBanner">No network connection. Location data will sync when reconnected.</div>
+
+<script>
+const ANANTAPUR = [14.6819, 77.6006];
+const ROLE_SELECTED = {role:'admin'};
+
+const DEMO_USERS = {
+  'AP-HEAD-0001':{password:'admin123',role:'admin',name:'DSP Ravi Kumar',badge:'001'},
+  'AP-OFF-0012':{password:'officer123',role:'officer',name:'Inspector Suresh',badge:'012'},
+  'AP-CONST-0101':{password:'const123',role:'constable',name:'Cst. Balakrishna',badge:'101'},
+};
+
+const PERSONNEL = [
+  {id:'p1',name:'Cst. Balakrishna',pid:'AP-CONST-0101',role:'constable',inZone:true,lat:14.6841,lng:77.6025,score:92},
+  {id:'p2',name:'Cst. Venkatesh',pid:'AP-CONST-0102',role:'constable',inZone:true,lat:14.6802,lng:77.5988,score:85},
+  {id:'p3',name:'Cst. Nagarjuna',pid:'AP-CONST-0103',role:'constable',inZone:false,lat:14.6755,lng:77.6110,score:64},
+  {id:'p4',name:'Cst. Subrahmanyam',pid:'AP-CONST-0104',role:'constable',inZone:true,lat:14.6879,lng:77.5971,score:79},
+  {id:'p5',name:'Inspector Suresh',pid:'AP-OFF-0012',role:'officer',inZone:true,lat:14.6830,lng:77.6000,score:96},
+];
+
+const ZONES_DATA = [
+  {id:'z1',name:'Market Area — Zone A',lat:14.6841,lng:77.6025,radius:600,color:'#1E6FCC'},
+  {id:'z2',name:'Bus Stand — Zone B',lat:14.6762,lng:77.5965,radius:500,color:'#0EAD7A'},
+  {id:'z3',name:'Old Town — Zone C',lat:14.6910,lng:77.6120,radius:450,color:'#E8900A'},
+];
+
+let APP = {role:'admin',user:null,maps:{},markers:{},constable:{onDuty:false,gpsWatchId:null,updates:0},dutyTimer:null};
+
+function selectRole(r){
+  ROLE_SELECTED.role=r;
+  document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('active'));
+  document.querySelector(`[data-role="${r}"]`).classList.add('active');
+}
+
+function handleLogin(){
+  const pid=document.getElementById('loginPoliceId').value.trim().toUpperCase();
+  const pwd=document.getElementById('loginPassword').value;
+  const err=document.getElementById('loginError');
+  const btn=document.getElementById('loginBtn');
+  err.classList.remove('show');
+  const demo=DEMO_USERS[pid];
+  if(demo && demo.password===pwd){
+    if(ROLE_SELECTED.role!==demo.role){
+      err.textContent=`This ID belongs to a ${demo.role}, not ${ROLE_SELECTED.role}.`;
+      err.classList.add('show');return;
+    }
+    APP.user=demo;APP.role=demo.role;
+    document.getElementById('loginScreen').classList.remove('active');
+    document.getElementById('appScreen').classList.add('active');
+    updateSidebar();buildNav();startClock();
+    if(APP.role==='admin'){navigateTo('admin-dashboard');}
+    else if(APP.role==='officer'){navigateTo('officer-dashboard');}
+    else{navigateTo('constable-dashboard');}
+  } else {
+    err.textContent='Invalid Police ID or password. Try: AP-HEAD-0001 / admin123';
+    err.classList.add('show');
+  }
+}
+
+function handleLogout(){
+  if(APP.constable.gpsWatchId) navigator.geolocation.clearWatch(APP.constable.gpsWatchId);
+  clearInterval(APP.dutyTimer);
+  APP={role:'admin',user:null,maps:{},markers:{},constable:{onDuty:false,gpsWatchId:null,updates:0},dutyTimer:null};
+  document.getElementById('appScreen').classList.remove('active');
+  document.getElementById('loginScreen').classList.add('active');
+  document.getElementById('loginPoliceId').value='';
+  document.getElementById('loginPassword').value='';
+}
+
+function updateSidebar(){
+  const u=APP.user;
+  document.getElementById('sidebarName').textContent=u.name;
+  document.getElementById('sidebarRole').textContent=u.role==='admin'?'Head Admin':u.role==='officer'?'Zone Officer':'Constable';
+  const init=u.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+  const av=document.getElementById('sidebarAvatar');
+  av.textContent=init;
+  av.style.background=u.role==='admin'?'#1E6FCC':u.role==='officer'?'#0EAD7A':'#E8900A';
+}
+
+function buildNav(){
+  const nav=document.getElementById('sidebarNav');
+  const ico=d=>`<svg style="width:18px;height:18px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${d}</svg>`;
+  if(APP.role==='admin'){
+    nav.innerHTML=`
+      <div class="nav-section-label">Overview</div>
+      <div class="nav-item active" data-page="admin-dashboard" onclick="navigateTo('admin-dashboard')">${ico('<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>')}Dashboard</div>
+      <div class="nav-section-label">Operations</div>
+      <div class="nav-item" data-page="admin-zones" onclick="navigateTo('admin-zones')">${ico('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/>')}Zones</div>
+      <div class="nav-item" data-page="admin-vip" onclick="navigateTo('admin-vip')">${ico('<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>')}VIP Tracking</div>
+      <div class="nav-section-label">Reports</div>
+      <div class="nav-item" data-page="admin-analytics" onclick="navigateTo('admin-analytics')">${ico('<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>')}Analytics</div>`;
+  } else if(APP.role==='officer'){
+    nav.innerHTML=`<div class="nav-section-label">My Zone</div><div class="nav-item active" data-page="officer-dashboard" onclick="navigateTo('officer-dashboard')">${ico('<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>')}Zone Dashboard</div>`;
+  } else {
+    nav.innerHTML=`<div class="nav-section-label">Duty</div><div class="nav-item active" data-page="constable-dashboard" onclick="navigateTo('constable-dashboard')">${ico('<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>')}My Dashboard</div>`;
+  }
+}
+
+function navigateTo(pid){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const page=document.getElementById('page-'+pid);
+  if(page) page.classList.add('active');
+  const ni=document.querySelector('[data-page="'+pid+'"]');
+  if(ni) ni.classList.add('active');
+  const titles={'admin-dashboard':'Command Dashboard','admin-zones':'Zone Management','admin-vip':'VIP Tracking','admin-analytics':'Analytics','officer-dashboard':'Zone Dashboard','constable-dashboard':'My Duty Dashboard'};
+  document.getElementById('topbarTitle').textContent=titles[pid]||'Dashboard';
+  setTimeout(()=>{
+    if(pid==='admin-dashboard') initMasterMap();
+    if(pid==='admin-zones') initZoneMap();
+    if(pid==='admin-vip') initVIPMap();
+    if(pid==='officer-dashboard') initOfficerMap();
+    if(pid==='admin-analytics') loadAnalytics();
+    renderPersonnel();
+    renderOfficerConstables();
+    renderZoneList();
+  },50);
+}
+
+// ── LEAFLET MAP TILE LAYER ──
+function baseTiles(map){
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    maxZoom:19,
+    attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(map);
+}
+
+function personnelIcon(inZone){
+  const color=inZone?'#0EAD7A':'#D42B2B';
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
+    <path d="M14 0C6.27 0 0 6.27 0 14c0 9.63 14 22 14 22S28 23.63 28 14C28 6.27 21.73 0 14 0z" fill="${color}" stroke="white" stroke-width="2"/>
+    <circle cx="14" cy="13" r="5" fill="white"/>
+  </svg>`;
+  return L.divIcon({html:svg,iconSize:[28,36],iconAnchor:[14,36],popupAnchor:[0,-36],className:''});
+}
+
+function vipIcon(){
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34">
+    <rect x="2" y="2" width="30" height="30" rx="6" fill="#E8900A" stroke="white" stroke-width="2"/>
+    <text x="17" y="22" text-anchor="middle" font-family="Sora,sans-serif" font-size="14" font-weight="bold" fill="white">V</text>
+  </svg>`;
+  return L.divIcon({html:svg,iconSize:[34,34],iconAnchor:[17,34],popupAnchor:[0,-34],className:''});
+}
+
+function liveGPSIcon(){
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="42" viewBox="0 0 32 42">
+    <path d="M16 0C7.16 0 0 7.16 0 16c0 11.11 16 26 16 26S32 27.11 32 16C32 7.16 24.84 0 16 0z" fill="#1E6FCC" stroke="white" stroke-width="2.5"/>
+    <circle cx="16" cy="15" r="5" fill="white"/>
+    <circle cx="16" cy="15" r="3" fill="#1E6FCC"/>
+  </svg>`;
+  return L.divIcon({html:svg,iconSize:[32,42],iconAnchor:[16,42],popupAnchor:[0,-42],className:''});
+}
+
+// ── MASTER MAP ──
+function initMasterMap(){
+  if(APP.maps.master) return;
+  APP.maps.master=L.map('masterMap',{zoomControl:true}).setView(ANANTAPUR,13);
+  baseTiles(APP.maps.master);
+  ZONES_DATA.forEach(z=>{
+    L.circle([z.lat,z.lng],{radius:z.radius,color:z.color,fillColor:z.color,fillOpacity:0.12,weight:2}).addTo(APP.maps.master).bindPopup(`<strong>${z.name}</strong>`);
+  });
+  PERSONNEL.forEach(p=>{
+    if(!p.lat) return;
+    L.marker([p.lat,p.lng],{icon:personnelIcon(p.inZone)}).addTo(APP.maps.master)
+      .bindPopup(`<strong>${p.name}</strong><br><span style="color:${p.inZone?'#0EAD7A':'#D42B2B'};font-weight:700">${p.inZone?'IN ZONE':'OUTSIDE ZONE'}</span><br><small style="color:#546E8A">${p.pid}</small>`);
+  });
+  // Simulate gentle drift
+  setInterval(()=>{ if(!APP.maps.master) return; PERSONNEL.forEach(p=>{p.lat+=(Math.random()-.5)*0.0001;p.lng+=(Math.random()-.5)*0.0001;}); },8000);
+}
+
+function refreshMasterMap(){
+  if(APP.maps.master) APP.maps.master.setView(ANANTAPUR,13);
+}
+
+// ── ZONE MAP ──
+let zoneTool='select', pendingCircle=null, drawnZones=[];
+function initZoneMap(){
+  if(APP.maps.zone) return;
+  APP.maps.zone=L.map('zoneMap',{zoomControl:true}).setView(ANANTAPUR,14);
+  baseTiles(APP.maps.zone);
+  ZONES_DATA.forEach(z=>{
+    const c=L.circle([z.lat,z.lng],{radius:z.radius,color:z.color,fillColor:z.color,fillOpacity:0.15,weight:2}).addTo(APP.maps.zone).bindPopup(z.name);
+    drawnZones.push(c);
+  });
+  APP.maps.zone.on('click',onZoneMapClick);
+  renderZoneList();
+}
+
+function onZoneMapClick(e){
+  if(zoneTool==='circle'){
+    const lat=e.latlng.lat.toFixed(6), lng=e.latlng.lng.toFixed(6);
+    document.getElementById('newZoneLat').value=lat;
+    document.getElementById('newZoneLng').value=lng;
+    document.getElementById('addZoneModal').classList.add('open');
+  }
+}
+
+function setZoneTool(t,btn){
+  zoneTool=t;
+  document.querySelectorAll('.zone-tool-btn').forEach(b=>b.classList.remove('active-tool'));
+  btn.classList.add('active-tool');
+  if(APP.maps.zone) APP.maps.zone.getContainer().style.cursor=t==='circle'?'crosshair':'';
+}
+
+function removeLastZone(){
+  if(drawnZones.length && APP.maps.zone){
+    APP.maps.zone.removeLayer(drawnZones.pop());
+    renderZoneList();
+  }
+}
+
+function createZone(){
+  const name=document.getElementById('newZoneName').value.trim();
+  const lat=parseFloat(document.getElementById('newZoneLat').value);
+  const lng=parseFloat(document.getElementById('newZoneLng').value);
+  const radius=parseInt(document.getElementById('newZoneRadius').value);
+  if(!name||isNaN(lat)||isNaN(radius)){alert('Fill all fields.');return;}
+  const colors=['#7C3AED','#D42B2B','#0EAD7A','#1E6FCC','#E8900A'];
+  const color=colors[ZONES_DATA.length%colors.length];
+  const z={id:'z'+Date.now(),name,lat,lng,radius,color};
+  ZONES_DATA.push(z);
+  if(APP.maps.zone){
+    const c=L.circle([lat,lng],{radius,color,fillColor:color,fillOpacity:0.15,weight:2}).addTo(APP.maps.zone).bindPopup(name);
+    drawnZones.push(c);
+    APP.maps.zone.flyTo([lat,lng],14);
+  }
+  if(APP.maps.master){
+    L.circle([lat,lng],{radius,color,fillColor:color,fillOpacity:0.12,weight:2}).addTo(APP.maps.master).bindPopup(name);
+  }
+  document.getElementById('zoneCount').textContent=`${ZONES_DATA.length} Zones`;
+  renderZoneList();
+  closeModal('addZoneModal');
+  document.getElementById('newZoneName').value='';
+}
+
+function renderZoneList(){
+  const el=document.getElementById('zoneListAdmin');
+  if(!el) return;
+  el.innerHTML=ZONES_DATA.map(z=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--surface-mid)">
+      <div style="width:10px;height:10px;border-radius:50%;background:${z.color};flex-shrink:0"></div>
+      <div><div style="font-size:13.5px;font-weight:600;color:var(--ink)">${z.name}</div><div style="font-size:11.5px;color:var(--text-soft)">R: ${z.radius}m</div></div>
+    </div>`).join('');
+}
+
+// ── VIP MAP ──
+let vipMarker=null;
+function initVIPMap(){
+  if(APP.maps.vip) return;
+  APP.maps.vip=L.map('vipMap',{zoomControl:true}).setView(ANANTAPUR,13);
+  baseTiles(APP.maps.vip);
+  ZONES_DATA.forEach(z=>{
+    L.circle([z.lat,z.lng],{radius:z.radius,color:z.color,fillColor:z.color,fillOpacity:0.10,weight:1.5,dashArray:'6 4'}).addTo(APP.maps.vip);
+  });
+  vipMarker=L.marker([14.6830,77.6010],{icon:vipIcon()}).addTo(APP.maps.vip).bindPopup('<strong>District Collector</strong><br>Z+ Security<br>Collectorate → Circuit House');
+  // Animate VIP movement
+  setInterval(()=>{
+    if(!vipMarker||!APP.maps.vip) return;
+    const pos=vipMarker.getLatLng();
+    vipMarker.setLatLng([pos.lat+(Math.random()-.5)*0.0003,pos.lng+(Math.random()-.5)*0.0003]);
+  },3000);
+}
+
+function addVIP(){
+  const name=document.getElementById('vipName').value.trim();
+  if(!name){alert('Enter VIP name.');return;}
+  if(vipMarker && APP.maps.vip) vipMarker.bindPopup(`<strong>${name}</strong><br>${document.getElementById('vipLevel').value} Security`);
+  closeModal('addVIPModal');
+  document.getElementById('vipName').value='';
+}
+
+// ── OFFICER MAP ──
+function initOfficerMap(){
+  if(APP.maps.officer) return;
+  APP.maps.officer=L.map('officerMap',{zoomControl:true}).setView(ANANTAPUR,14);
+  baseTiles(APP.maps.officer);
+  ZONES_DATA.slice(0,1).forEach(z=>{
+    L.circle([z.lat,z.lng],{radius:z.radius,color:z.color,fillColor:z.color,fillOpacity:0.15,weight:2}).addTo(APP.maps.officer).bindPopup(z.name);
+  });
+  PERSONNEL.filter(p=>p.role==='constable').forEach(p=>{
+    L.marker([p.lat,p.lng],{icon:personnelIcon(p.inZone)}).addTo(APP.maps.officer).bindPopup(`<strong>${p.name}</strong><br>${p.pid}`);
+  });
+}
+
+// ── CONSTABLE MAP (Live GPS) ──
+let constableMap=null, constableGPSMarker=null, constableAccCircle=null;
+let lastGPSLat=null,lastGPSLng=null;
+function initConstableMap(){
+  if(constableMap) return;
+  constableMap=L.map('constableMap',{zoomControl:false,attributionControl:false}).setView(ANANTAPUR,15);
+  baseTiles(constableMap);
+  // Zone reference
+  ZONES_DATA.slice(0,1).forEach(z=>{
+    L.circle([z.lat,z.lng],{radius:z.radius,color:z.color,fillColor:z.color,fillOpacity:0.12,weight:1.5,dashArray:'6 3'}).addTo(constableMap);
+  });
+}
+
+function startGPSTracking(){
+  initConstableMap();
+  if(!navigator.geolocation){
+    document.getElementById('constableGPSStatus').textContent='GPS: Not available on this device';
+    return;
+  }
+  let firstFix=true;
+  APP.constable.gpsWatchId=navigator.geolocation.watchPosition(pos=>{
+    const lat=pos.coords.latitude, lng=pos.coords.longitude, acc=pos.coords.accuracy;
+    if(lastGPSLat&&lastGPSLng){
+      const d=getDistance(lastGPSLat,lastGPSLng,lat,lng);
+      if(d<10) return;
+    }
+    lastGPSLat=lat; lastGPSLng=lng;
+    APP.constable.updates++;
+    document.getElementById('logUpdates').textContent=APP.constable.updates;
+    document.getElementById('constableGPSStatus').textContent=`GPS: ±${Math.round(acc)}m — ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    if(constableGPSMarker){
+      constableGPSMarker.setLatLng([lat,lng]);
+    } else {
+      constableGPSMarker=L.marker([lat,lng],{icon:liveGPSIcon()}).addTo(constableMap).bindPopup('Your live location');
+    }
+    if(constableAccCircle){
+      constableAccCircle.setLatLng([lat,lng]).setRadius(acc);
+    } else {
+      constableAccCircle=L.circle([lat,lng],{radius:acc,color:'#1E6FCC',fillColor:'#1E6FCC',fillOpacity:0.10,weight:1}).addTo(constableMap);
+    }
+    if(firstFix){constableMap.setView([lat,lng],16);firstFix=false;}
+    else constableMap.panTo([lat,lng]);
+    // Check zone
+    const inZone=checkInZone(lat,lng);
+    updateZoneIndicator(inZone);
+  }, err=>{
+    if(err.code===1) document.getElementById('constableGPSStatus').textContent='GPS: Permission denied — Enable location access in browser';
+    else document.getElementById('constableGPSStatus').textContent='GPS: Error acquiring location';
+  },{enableHighAccuracy:true,maximumAge:1000,timeout:10000});
+}
+
+function checkInZone(lat,lng){
+  const z=ZONES_DATA[0];
+  const d=getDistance(lat,lng,z.lat,z.lng);
+  return d<=z.radius;
+}
+
+function getDistance(lat1,lng1,lat2,lng2){
+  const R=6371000,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function updateZoneIndicator(inZone){
+  const el=document.getElementById('zoneIndicator'),txt=document.getElementById('zoneIndicatorText'),card=document.getElementById('zoneStatusCard');
+  if(inZone===null){el.style.background='rgba(255,255,255,0.15)';txt.textContent='GPS Acquiring...';return;}
+  if(inZone){
+    el.style.background='rgba(14,173,122,0.3)';txt.textContent='IN ZONE — Compliant';
+    card.style.background='linear-gradient(135deg,#1E6FCC,#1355A8)';
+  } else {
+    el.style.background='rgba(212,43,43,0.4)';txt.textContent='OUTSIDE ZONE — Return Now';
+    card.style.background='linear-gradient(135deg,#D42B2B,#A81F1F)';
+  }
+}
+
+let constableOnDuty=false;
+function handleConstableCheckIn(){
+  const btn=document.getElementById('checkInBtn');
+  if(!constableOnDuty){
+    constableOnDuty=true;
+    APP.constable.dutyStart=Date.now();
+    btn.textContent='CHECK OUT — End Duty';
+    btn.style.background='linear-gradient(135deg,#D42B2B,#A81F1F)';
+    btn.style.boxShadow='var(--sh-crimson)';
+    document.getElementById('constableStatus').textContent='ON DUTY';
+    document.getElementById('constableStatus').style.color='var(--mint)';
+    document.getElementById('logCheckIn').textContent=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    APP.dutyTimer=setInterval(()=>{
+      const diff=Date.now()-APP.constable.dutyStart;
+      const h=Math.floor(diff/3600000).toString().padStart(2,'0');
+      const m=Math.floor((diff%3600000)/60000).toString().padStart(2,'0');
+      const s=Math.floor((diff%60000)/1000).toString().padStart(2,'0');
+      document.getElementById('constableDuration').textContent=`${h}:${m}:${s}`;
+    },1000);
+    startGPSTracking();
+    // Also show map even before first fix
+    setTimeout(()=>{if(constableMap) constableMap.invalidateSize();},200);
+  } else {
+    constableOnDuty=false;
+    btn.textContent='CHECK IN — Start Duty';
+    btn.style.background='linear-gradient(135deg,#0EAD7A,#087A55)';
+    btn.style.boxShadow='var(--sh-mint)';
+    document.getElementById('constableStatus').textContent='OFF DUTY';
+    document.getElementById('constableStatus').style.color='var(--text-soft)';
+    document.getElementById('constableDuration').textContent='--:--:--';
+    document.getElementById('constableGPSStatus').textContent='GPS: Inactive';
+    clearInterval(APP.dutyTimer);
+    if(APP.constable.gpsWatchId) navigator.geolocation.clearWatch(APP.constable.gpsWatchId);
+    APP.constable.gpsWatchId=null;
+    updateZoneIndicator(null);
+    card.style.background='linear-gradient(135deg,#1E6FCC,#1355A8)';
+    document.getElementById('zoneStatusCard').style.background='linear-gradient(135deg,#1E6FCC,#1355A8)';
+  }
+}
+
+function renderPersonnel(){
+  const el=document.getElementById('allPersonnelList');
+  if(!el) return;
+  const colors={admin:'#1E6FCC',officer:'#0EAD7A',constable:'#7C3AED'};
+  el.innerHTML=PERSONNEL.map(p=>{
+    const init=p.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    const sc=p.score;const sc_col=sc>=80?'var(--mint)':sc>=60?'var(--amber)':'var(--crimson)';
+    return `<div class="officer-row">
+      <div class="officer-avatar" style="background:${colors[p.role]||'#1E6FCC'}">${init}</div>
+      <div><div class="officer-name">${p.name}</div><div class="officer-id">${p.pid}</div></div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:14px">
+        <div style="text-align:right"><div style="font-size:11.5px;font-weight:700;color:${sc_col}">${sc}/100</div><div style="font-size:10.5px;color:var(--text-ghost)">Score</div></div>
+        <span class="tag ${p.inZone?'tag-green':'tag-red'}"><span class="tag-dot"></span>${p.inZone?'In Zone':'Outside'}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderOfficerConstables(){
+  const el=document.getElementById('officerConstableList');
+  if(!el) return;
+  el.innerHTML=PERSONNEL.filter(p=>p.role==='constable').map(p=>{
+    const init=p.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    return `<div class="officer-row">
+      <div class="officer-avatar" style="background:#7C3AED">${init}</div>
+      <div><div class="officer-name">${p.name}</div><div class="officer-id">${p.pid}</div></div>
+      <div style="margin-left:auto"><span class="tag ${p.inZone?'tag-green':'tag-red'}"><span class="tag-dot"></span>${p.inZone?'In Zone':'Outside'}</span></div>
+    </div>`;
+  }).join('');
+}
+
+function ackAlert(btn){
+  const row=btn.closest('.alert-item');
+  row.style.opacity='0.4';
+  btn.textContent='Acked';btn.disabled=true;
+}
+
+function loadAnalytics(){
+  const zp=document.getElementById('zonePerf');
+  if(zp) zp.innerHTML=ZONES_DATA.map(z=>{const s=70+Math.floor(Math.random()*28);const bc=s>=80?'var(--mint)':s>=60?'var(--amber)':'var(--crimson)';return `<div class="analytics-bar-row"><div class="analytics-bar-label">${z.name.substring(0,22)}</div><div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${s}%;background:${bc}"></div></div><div class="analytics-bar-val">${s}</div></div>`;}).join('');
+  const tp=document.getElementById('topPerf');
+  if(tp){const sorted=[...PERSONNEL].sort((a,b)=>b.score-a.score).slice(0,5);tp.innerHTML=sorted.map((p,i)=>{const medals=['#FFD700','#C0C0C0','#CD7F32'];const init=p.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();return `<div class="officer-row"><div style="font-size:13px;font-weight:800;color:${medals[i]||'var(--text-soft)'};min-width:20px;text-align:center">#${i+1}</div><div class="officer-avatar" style="background:#7C3AED">${init}</div><div><div class="officer-name">${p.name}</div><div class="officer-id">${p.pid}</div></div><div style="margin-left:auto"><span style="font-size:15px;font-weight:800;color:var(--mint)">${p.score}</span><span style="font-size:11px;color:var(--text-ghost)">/100</span></div></div>`;}).join('');}
+}
+
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.addEventListener('click',e=>{if(e.target.classList.contains('modal-overlay'))e.target.classList.remove('open');});
+
+function startClock(){
+  const tick=()=>document.getElementById('topbarClock').textContent=new Date().toLocaleTimeString('en-IN',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  tick();setInterval(tick,1000);
+}
+
+window.addEventListener('offline',()=>document.getElementById('offlineBanner').classList.add('show'));
+window.addEventListener('online',()=>document.getElementById('offlineBanner').classList.remove('show'));
+</script>

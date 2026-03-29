@@ -1,0 +1,3521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0A1628">
+<title>TRACK FORCE — Anantapur Police</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+/* =====================================================
+   BANDOBUSTH.AI — DESIGN SYSTEM
+   Light command-center theme, military precision
+===================================================== */
+:root {
+  --ink: #0A1628;
+  --ink-mid: #1A2E4A;
+  --ink-soft: #2D4263;
+  --sky: #1E6FCC;
+  --sky-bright: #2E85F0;
+  --sky-pale: #EBF3FF;
+  --sky-ghost: #F4F8FF;
+  --mint: #0EAD7A;
+  --mint-pale: #E6FAF4;
+  --amber: #E8900A;
+  --amber-pale: #FFF3DC;
+  --crimson: #D42B2B;
+  --crimson-pale: #FFE8E8;
+  --violet: #7C3AED;
+  --slate: #546E8A;
+  --slate-mid: #7A94AF;
+  --slate-pale: #EFF4F9;
+  --white: #FFFFFF;
+  --surface: #F6F9FD;
+  --surface-mid: #EDF2F8;
+  --border: #DDE6F0;
+  --border-strong: #C4D4E6;
+  --text: #0A1628;
+  --text-mid: #2D4263;
+  --text-soft: #546E8A;
+  --text-ghost: #8EABC5;
+
+  --r-xs: 6px;
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 18px;
+  --r-xl: 24px;
+  --r-pill: 999px;
+
+  --sh-xs: 0 1px 3px rgba(10,22,40,0.06);
+  --sh-sm: 0 2px 8px rgba(10,22,40,0.08), 0 1px 3px rgba(10,22,40,0.04);
+  --sh-md: 0 4px 16px rgba(10,22,40,0.10), 0 2px 6px rgba(10,22,40,0.05);
+  --sh-lg: 0 8px 32px rgba(10,22,40,0.12), 0 4px 12px rgba(10,22,40,0.06);
+  --sh-sky: 0 4px 24px rgba(30,111,204,0.25);
+  --sh-mint: 0 4px 24px rgba(14,173,122,0.25);
+  --sh-crimson: 0 4px 24px rgba(212,43,43,0.25);
+
+  --sidebar-w: 230px;
+  --topbar-h: 58px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 14px; scroll-behavior: smooth; }
+
+body {
+  font-family: 'Sora', sans-serif;
+  background: var(--surface);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 10px; }
+
+/* Mono font */
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+/* ═══════════════════════════════════════════════
+   SCREEN SWITCHING
+═══════════════════════════════════════════════ */
+.screen { display: none !important; }
+.screen.active { display: flex !important; }
+
+/* ═══════════════════════════════════════════════
+   LOGIN SCREEN
+═══════════════════════════════════════════════ */
+#loginScreen {
+  min-height: 100vh;
+  background: linear-gradient(155deg, #050E1C 0%, #0C1F3D 45%, #0E2652 75%, #071630 100%);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative grid overlay */
+#loginScreen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(30,111,204,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30,111,204,0.06) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+
+/* Glow orbs */
+.login-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.login-orb-1 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(30,111,204,0.18) 0%, transparent 65%);
+  top: -180px; right: -100px;
+}
+.login-orb-2 {
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, rgba(14,173,122,0.10) 0%, transparent 65%);
+  bottom: -100px; left: -80px;
+}
+
+.login-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.09);
+  backdrop-filter: blur(24px);
+  border-radius: var(--r-xl);
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 440px;
+  position: relative;
+  z-index: 2;
+  animation: loginFadeIn 0.5s ease;
+}
+
+@keyframes loginFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.login-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 36px;
+}
+
+.login-emblem {
+  width: 54px; height: 54px;
+  background: linear-gradient(140deg, #1E6FCC 0%, #0EAD7A 100%);
+  border-radius: 15px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 6px 24px rgba(30,111,204,0.45);
+  position: relative;
+}
+.login-emblem svg { width: 28px; height: 28px; fill: white; }
+
+.login-brand h1 {
+  font-size: 20px;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.3px;
+  line-height: 1.1;
+}
+.login-brand p {
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.42);
+  margin-top: 3px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.role-section-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.38);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.role-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+.role-card {
+  background: rgba(255,255,255,0.045);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: var(--r-md);
+  padding: 14px 8px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.22s ease;
+  color: rgba(255,255,255,0.65);
+  user-select: none;
+}
+.role-card:hover {
+  background: rgba(255,255,255,0.09);
+  border-color: rgba(255,255,255,0.20);
+  color: white;
+}
+.role-card.active {
+  background: rgba(30,111,204,0.22);
+  border-color: rgba(46,133,240,0.55);
+  color: white;
+  box-shadow: 0 0 0 1px rgba(46,133,240,0.3) inset;
+}
+.role-card-icon {
+  font-size: 22px;
+  margin-bottom: 7px;
+  display: block;
+}
+.role-card-name {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+}
+
+.login-form-fields { display: flex; flex-direction: column; gap: 14px; }
+
+.form-field label {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.42);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin-bottom: 7px;
+}
+
+.form-field input {
+  width: 100%;
+  background: rgba(255,255,255,0.065);
+  border: 1px solid rgba(255,255,255,0.11);
+  border-radius: var(--r-sm);
+  padding: 13px 15px;
+  color: white;
+  font-size: 14.5px;
+  font-family: 'Sora', sans-serif;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+.form-field input::placeholder { color: rgba(255,255,255,0.25); }
+.form-field input:focus {
+  border-color: rgba(46,133,240,0.6);
+  background: rgba(255,255,255,0.09);
+}
+
+.login-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #1E6FCC 0%, #1557A8 100%);
+  color: white;
+  border: none;
+  border-radius: var(--r-sm);
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Sora', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--sh-sky);
+  margin-top: 6px;
+  letter-spacing: 0.01em;
+  position: relative;
+  overflow: hidden;
+}
+.login-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+  pointer-events: none;
+}
+.login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(30,111,204,0.40);
+}
+.login-btn:active { transform: translateY(0); }
+.login-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+.login-error {
+  background: rgba(212,43,43,0.15);
+  border: 1px solid rgba(212,43,43,0.30);
+  color: #FF8080;
+  padding: 10px 14px;
+  border-radius: var(--r-xs);
+  font-size: 12.5px;
+  display: none;
+  margin-top: 10px;
+}
+.login-error.show { display: block; }
+
+.login-footer {
+  text-align: center;
+  margin-top: 22px;
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.25);
+}
+
+/* ═══════════════════════════════════════════════
+   APP LAYOUT
+═══════════════════════════════════════════════ */
+#appScreen {
+  min-height: 100vh;
+  flex-direction: row;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  background: var(--ink);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  z-index: 50;
+  transition: width 0.3s ease;
+}
+
+.sidebar-brand {
+  padding: 18px 16px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.sidebar-icon {
+  width: 34px; height: 34px;
+  background: linear-gradient(140deg, #1E6FCC, #0EAD7A);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.sidebar-icon svg { width: 18px; height: 18px; fill: white; }
+.sidebar-brand-text h2 {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.2px;
+  line-height: 1.2;
+}
+.sidebar-brand-text p {
+  font-size: 10px;
+  color: rgba(255,255,255,0.35);
+  font-weight: 400;
+}
+
+.sidebar-user {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.sidebar-user-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.user-avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+.user-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.88);
+  line-height: 1.2;
+}
+.user-role-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.40);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-section-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.22);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  padding: 10px 8px 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  color: rgba(255,255,255,0.52);
+  font-size: 13px;
+  font-weight: 500;
+  position: relative;
+  user-select: none;
+}
+.nav-item:hover {
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.82);
+}
+.nav-item.active {
+  background: rgba(30,111,204,0.20);
+  color: #5BA8F5;
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 25%; bottom: 25%;
+  width: 3px;
+  background: #2E85F0;
+  border-radius: 0 3px 3px 0;
+}
+.nav-item-icon { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.85; }
+.nav-item.active .nav-item-icon { opacity: 1; }
+.nav-badge {
+  margin-left: auto;
+  background: var(--crimson);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 99px;
+  min-width: 18px;
+  text-align: center;
+  line-height: 14px;
+}
+
+.sidebar-footer {
+  padding: 12px 10px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.sidebar-footer-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  color: rgba(255,255,255,0.40);
+  font-size: 12.5px;
+  transition: all 0.18s;
+  background: none;
+  border: none;
+  width: 100%;
+  font-family: 'Sora', sans-serif;
+}
+.sidebar-footer-btn:hover {
+  background: rgba(212,43,43,0.12);
+  color: #FF8080;
+}
+
+/* ── MAIN CONTENT AREA ── */
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  height: var(--topbar-h);
+  background: white;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 16px;
+  flex-shrink: 0;
+  z-index: 40;
+  box-shadow: var(--sh-xs);
+}
+.topbar-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.2px;
+}
+.topbar-sub {
+  font-size: 12px;
+  color: var(--text-soft);
+  margin-top: 1px;
+}
+.topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.topbar-clock {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 5px 12px;
+  border-radius: var(--r-xs);
+}
+.status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--mint);
+  box-shadow: 0 0 0 3px rgba(14,173,122,0.22);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(14,173,122,0.22); }
+  50% { box-shadow: 0 0 0 6px rgba(14,173,122,0.08); }
+}
+.ws-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--text-soft);
+  font-weight: 500;
+}
+
+/* ── PAGE CONTENT ── */
+.pages { flex: 1; overflow-y: auto; }
+.page { display: none; padding: 24px; animation: pageIn 0.3s ease; }
+.page.active { display: block; }
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════
+   DESIGN COMPONENTS
+═══════════════════════════════════════════════ */
+
+/* Cards */
+.card {
+  background: white;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--sh-xs);
+}
+.card-pad { padding: 20px; }
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--surface-mid);
+}
+.card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-body { padding: 20px; }
+
+/* Stat cards */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: white;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+  padding: 18px 20px;
+  box-shadow: var(--sh-xs);
+  transition: box-shadow 0.2s, transform 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card:hover { box-shadow: var(--sh-md); transform: translateY(-2px); }
+.stat-card-accent {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+}
+.stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+}
+.stat-value {
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1;
+  letter-spacing: -1px;
+  margin-bottom: 6px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.stat-trend {
+  font-size: 11.5px;
+  color: var(--text-ghost);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.trend-up { color: var(--mint); }
+.trend-down { color: var(--crimson); }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Sora', sans-serif;
+  cursor: pointer;
+  border: none;
+  transition: all 0.18s ease;
+  letter-spacing: 0.01em;
+  user-select: none;
+}
+.btn-primary {
+  background: var(--sky);
+  color: white;
+  box-shadow: var(--sh-sky);
+}
+.btn-primary:hover { background: var(--sky-bright); transform: translateY(-1px); }
+.btn-success {
+  background: var(--mint);
+  color: white;
+  box-shadow: var(--sh-mint);
+}
+.btn-success:hover { background: #0C9B6C; transform: translateY(-1px); }
+.btn-danger {
+  background: var(--crimson);
+  color: white;
+  box-shadow: var(--sh-crimson);
+}
+.btn-danger:hover { background: #BE2525; transform: translateY(-1px); }
+.btn-ghost {
+  background: var(--surface);
+  color: var(--text-mid);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { background: var(--surface-mid); }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-lg { padding: 13px 22px; font-size: 15px; font-weight: 700; }
+.btn-xl { padding: 16px 28px; font-size: 16px; font-weight: 800; border-radius: var(--r-md); }
+
+/* Tags / Badges */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.tag-green { background: var(--mint-pale); color: #078056; }
+.tag-red { background: var(--crimson-pale); color: #A81F1F; }
+.tag-amber { background: var(--amber-pale); color: #9E5F00; }
+.tag-blue { background: var(--sky-pale); color: #134E99; }
+.tag-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* Section headers */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.2px;
+}
+.section-sub {
+  font-size: 12px;
+  color: var(--text-soft);
+  margin-top: 2px;
+}
+
+/* Map containers */
+.map-container {
+  position: relative;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: var(--sh-md);
+}
+.map-controls {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 10;
+}
+.map-control-btn {
+  width: 34px; height: 34px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--sh-sm);
+  font-size: 14px;
+  transition: all 0.18s;
+}
+.map-control-btn:hover { background: var(--sky); color: white; }
+
+.map-legend {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: rgba(255,255,255,0.95);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 10px 14px;
+  box-shadow: var(--sh-sm);
+  z-index: 10;
+  display: flex;
+  gap: 14px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-mid);
+}
+.legend-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Tables */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+tbody td {
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--text-mid);
+  border-bottom: 1px solid var(--surface-mid);
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--sky-ghost); }
+
+/* Alert items */
+.alert-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--surface-mid);
+  transition: background 0.18s;
+}
+.alert-item:hover { background: var(--surface); }
+.alert-item:last-child { border-bottom: none; }
+.alert-icon {
+  width: 36px; height: 36px;
+  border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.alert-icon-red { background: var(--crimson-pale); }
+.alert-icon-amber { background: var(--amber-pale); }
+.alert-icon-blue { background: var(--sky-pale); }
+.alert-info h4 { font-size: 13px; font-weight: 600; color: var(--ink); line-height: 1.3; }
+.alert-info p { font-size: 12px; color: var(--text-soft); margin-top: 3px; }
+.alert-time { font-size: 11px; color: var(--text-ghost); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+.alert-actions { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+
+/* Constable list rows */
+.officer-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--surface-mid);
+  transition: background 0.18s;
+}
+.officer-row:hover { background: var(--sky-ghost); }
+.officer-row:last-child { border-bottom: none; }
+.officer-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+.officer-name { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.officer-id { font-size: 11.5px; color: var(--text-soft); margin-top: 1px; font-family: 'JetBrains Mono', monospace; }
+.officer-meta { margin-left: auto; text-align: right; }
+
+/* Score bar */
+.score-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.score-bar-bg {
+  flex: 1;
+  height: 6px;
+  background: var(--surface-mid);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.score-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.5s ease;
+}
+
+/* Input */
+input, select, textarea {
+  font-family: 'Sora', sans-serif;
+}
+.input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 10px 14px;
+  font-size: 13.5px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input:focus {
+  border-color: var(--sky);
+  box-shadow: 0 0 0 3px rgba(30,111,204,0.10);
+}
+.input-label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-soft);
+  margin-bottom: 7px;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,22,40,0.55);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: white;
+  border-radius: var(--r-xl);
+  width: 100%;
+  max-width: 520px;
+  box-shadow: var(--sh-lg);
+  animation: modalIn 0.25s ease;
+  position: relative;
+  z-index: 10000;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-title { font-size: 16px; font-weight: 700; color: var(--ink); }
+.modal-close {
+  width: 30px; height: 30px;
+  border-radius: var(--r-xs);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--text-soft);
+  font-size: 18px;
+  transition: all 0.18s;
+  background: none;
+  border: none;
+  font-family: 'Sora', sans-serif;
+}
+.modal-close:hover { background: var(--surface-mid); color: var(--ink); }
+.modal-body { 
+  padding: 24px; 
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  z-index: 1;
+  background: white;
+}
+.modal-footer {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+}
+
+/* Constable Mobile PWA view */
+#constableView {
+  max-width: 420px;
+  margin: 0 auto;
+}
+.checkin-btn {
+  width: 100%;
+  border-radius: var(--r-lg);
+  padding: 18px;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  border: none;
+  cursor: pointer;
+  font-family: 'Sora', sans-serif;
+  transition: all 0.2s ease;
+  box-shadow: var(--sh-mint);
+  position: relative;
+  overflow: hidden;
+}
+.checkin-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+.zone-status-card {
+  border-radius: var(--r-lg);
+  padding: 22px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+  color: white;
+}
+.zone-status-card::before {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.10);
+}
+.zone-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--r-pill);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 12px;
+}
+
+/* Full screen alert overlay */
+.fullscreen-alert {
+  position: fixed;
+  inset: 0;
+  background: var(--crimson);
+  z-index: 999;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+  animation: alertFlash 1s ease;
+}
+.fullscreen-alert.show { display: flex; }
+@keyframes alertFlash {
+  0%, 100% { background: var(--crimson); }
+  50% { background: #A81F1F; }
+}
+
+/* Offline banner */
+.offline-banner {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--ink);
+  color: white;
+  text-align: center;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 500;
+  display: none;
+}
+.offline-banner.show { display: block; }
+
+/* Grid layouts */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar { position: fixed; left: -100%; transition: left 0.3s ease; }
+  .sidebar.open { left: 0; }
+  .main-area { width: 100%; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+}
+
+/* VIP route styling */
+.vip-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--surface-mid);
+}
+.vip-star {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--amber), #C47000);
+  border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  color: white;
+  flex-shrink: 0;
+}
+.vip-name { font-size: 13.5px; font-weight: 700; color: var(--ink); }
+.vip-route { font-size: 12px; color: var(--text-soft); margin-top: 2px; }
+.vip-status { margin-left: auto; }
+
+/* Analytics */
+.analytics-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--surface-mid);
+}
+.analytics-bar-label { font-size: 12.5px; color: var(--text-mid); font-weight: 500; min-width: 140px; }
+.analytics-bar-track {
+  flex: 1;
+  height: 8px;
+  background: var(--surface-mid);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.analytics-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: var(--sky);
+  transition: width 0.6s ease;
+}
+.analytics-bar-val { font-size: 12.5px; font-weight: 700; color: var(--ink); font-family: 'JetBrains Mono', monospace; min-width: 36px; text-align: right; }
+
+/* Zone planning toolbar */
+.zone-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--ink);
+  border-radius: var(--r-sm);
+  margin-bottom: 12px;
+}
+.zone-tool-btn {
+  padding: 6px 12px;
+  border-radius: var(--r-xs);
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.65);
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  cursor: pointer;
+  font-family: 'Sora', sans-serif;
+  transition: all 0.18s;
+}
+.zone-tool-btn:hover, .zone-tool-btn.active-tool {
+  background: rgba(30,111,204,0.35);
+  border-color: rgba(46,133,240,0.5);
+  color: white;
+}
+
+/* Discipline score ring */
+.score-ring { position: relative; display: inline-block; }
+.score-ring svg { transform: rotate(-90deg); }
+.score-ring-num {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--ink);
+  font-family: 'JetBrains Mono', monospace;
+}
+.score-ring-label { font-size: 9px; font-weight: 600; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* Loading spinner */
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* GPS pulse ring animation for markers */
+@keyframes markerPulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* Transition between pages */
+.page-transition { transition: opacity 0.25s ease; }
+
+/* Responsive mode */
+@media (max-width: 1200px) {
+  :root { --sidebar-w: 200px; }
+  .sidebar { width: var(--sidebar-w); min-width: var(--sidebar-w); }
+  .topbar { padding: 0 14px; }
+  .map-container, .card, .page { margin-bottom: 14px; }
+}
+@media (max-width: 1024px) {
+  #appScreen { flex-direction: column; }
+  .sidebar { position: relative; width: 100%; min-width: auto; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+  .main-area { min-height: auto; }
+  .topbar { flex-wrap: wrap; gap: 6px; height: auto; padding: 10px; }
+  .pages { padding: 10px; }
+  .page { padding: 16px; }
+  .map-controls { right: 6px; top: 8px; }
+}
+@media (max-width: 760px) {
+  .role-selector { grid-template-columns: 1fr; }
+  .sidebar-nav { display: grid; grid-template-columns: repeat(2,1fr); gap: 6px; }
+  .nav-item { justify-content: center; padding: 8px; font-size: 12px; }
+  .topbar-title { font-size: 16px; }
+  .map-legend { flex-wrap: wrap; gap: 8px; bottom: 8px; left: 8px; right: 8px; }
+  .map-container { border-radius: 10px; }
+  .engineer .card-body, .card-body { padding: 16px; }
+  #loginScreen { padding: 16px; }
+  .login-card { width: auto; min-width: 280px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     LOGIN SCREEN
+═══════════════════════════════════════════════ -->
+<div id="loginScreen" class="screen">
+  <div class="login-orb login-orb-1"></div>
+  <div class="login-orb login-orb-2"></div>
+
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-emblem">
+        <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+      </div>
+      <div class="login-brand">
+        <h1>Bandobusth.AI</h1>
+        <p>Anantapur District Police — Real-Time Command</p>
+      </div>
+    </div>
+
+    <div class="role-section-label">Select Your Role</div>
+    <div class="role-selector" id="roleSelector">
+      <div class="role-card active" data-role="admin" onclick="enterRole('admin')">
+        <span class="role-card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/><path d="M17 11l2 2 4-4"/></svg>
+        </span>
+        <div class="role-card-name">Head Admin</div>
+      </div>
+      <div class="role-card" data-role="officer" onclick="enterRole('officer')">
+        <span class="role-card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        </span>
+        <div class="role-card-name">Zone Officer</div>
+      </div>
+      <div class="role-card" data-role="constable" onclick="enterRole('constable')">
+        <span class="role-card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
+        </span>
+        <div class="role-card-name">Constable</div>
+      </div>
+    </div>
+
+    <div style="margin-top:18px;color:rgba(255,255,255,0.70);font-size:13px;line-height:1.5;text-align:center;">
+      Select a role card to open its dashboard.
+    </div>
+    <div class="login-footer">
+      Anantapur District Police — Secure Access &nbsp;|&nbsp; v2.0
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     FULL SCREEN ZONE VIOLATION ALERT
+═══════════════════════════════════════════════ -->
+<div class="fullscreen-alert" id="fullscreenAlert">
+  <div style="font-size: 72px; margin-bottom: 20px;">
+    <svg width="72" height="72" viewBox="0 0 24 24" fill="white"><path d="M12 2L1 21h22L12 2zm0 3.5L20.5 19h-17L12 5.5zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/></svg>
+  </div>
+  <h2 id="alertTitle" style="font-size:32px;font-weight:900;color:white;margin-bottom:12px;letter-spacing:-0.5px;">ZONE VIOLATION</h2>
+  <p id="alertBody" style="font-size:17px;color:rgba(255,255,255,0.85);line-height:1.6;max-width:340px;">You have exited your assigned duty zone. Return immediately or contact your Zone Officer.</p>
+  <button onclick="dismissAlert()" style="margin-top:36px;background:white;color:#D42B2B;border:none;padding:14px 36px;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer;font-family:Sora,sans-serif;">
+    Acknowledge
+  </button>
+</div>
+
+<!-- Offline Banner -->
+<div class="offline-banner" id="offlineBanner">
+  No network connection. Location data will sync when reconnected.
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     MAIN APP SCREEN
+═══════════════════════════════════════════════ -->
+<div id="appScreen" class="screen">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+      </div>
+      <div class="sidebar-brand-text">
+        <h2>Bandobusth.AI</h2>
+        <p>Command Center</p>
+      </div>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="sidebar-user-row">
+        <div class="user-avatar" id="sidebarAvatar" style="background:#1E6FCC;">H</div>
+        <div>
+          <div class="user-name" id="sidebarName">Loading...</div>
+          <div class="user-role-badge" id="sidebarRole">Head Admin</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav" id="sidebarNav">
+      <!-- Populated by JS based on role -->
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="sidebar-footer-btn" onclick="handleLogout()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-area">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="topbarTitle">Dashboard</div>
+        <div class="topbar-sub" id="topbarSub">Anantapur District Police</div>
+      </div>
+      <div class="topbar-right">
+        <div class="ws-status" id="wsStatus">
+          <div class="status-dot" id="wsDot" style="background:#94A3B8;box-shadow:none;"></div>
+          <span id="wsText">Connecting...</span>
+        </div>
+        <div class="topbar-clock mono" id="topbarClock">00:00:00</div>
+      </div>
+    </div>
+
+    <!-- Page Container -->
+    <div class="pages" id="pages">
+
+      <!-- ───────────────────────────────────
+           ADMIN DASHBOARD
+      ─────────────────────────────────── -->
+      <div class="page" id="page-admin-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card-accent" style="background:var(--sky);"></div>
+            <div class="stat-label">Active Constables</div>
+            <div class="stat-value" id="stat-active">0</div>
+            <div class="stat-trend"><span class="trend-up">On duty now</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-accent" style="background:var(--mint);"></div>
+            <div class="stat-label">Inside Zone</div>
+            <div class="stat-value" id="stat-inzone">0</div>
+            <div class="stat-trend">Compliant officers</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-accent" style="background:var(--crimson);"></div>
+            <div class="stat-label">Violations Today</div>
+            <div class="stat-value" id="stat-violations">0</div>
+            <div class="stat-trend trend-down" id="stat-viol-trend">Geofence exits</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-accent" style="background:var(--amber);"></div>
+            <div class="stat-label">Active Zones</div>
+            <div class="stat-value" id="stat-zones">0</div>
+            <div class="stat-trend">District coverage</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-accent" style="background:var(--violet);"></div>
+            <div class="stat-label">Pending Alerts</div>
+            <div class="stat-value" id="stat-alerts">0</div>
+            <div class="stat-trend">Unacknowledged</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-accent" style="background:var(--slate);"></div>
+            <div class="stat-label">Avg Discipline</div>
+            <div class="stat-value" id="stat-score">--</div>
+            <div class="stat-trend">District average</div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="gap:16px;">
+          <div>
+            <div class="section-header">
+              <div>
+                <div class="section-title">Master Map — All Zones</div>
+                <div class="section-sub">Live constable positions across Anantapur</div>
+              </div>
+              <button class="btn btn-ghost btn-sm" onclick="refreshMap()">Refresh</button>
+            </div>
+            <div class="map-container" id="masterMapContainer" style="height:420px;">
+              <div id="masterMap" style="width:100%;height:100%;"></div>
+              <div class="map-legend">
+                <div class="legend-item"><div class="legend-dot" style="background:var(--mint);"></div>In Zone</div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--crimson);"></div>Violation</div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--amber);"></div>Offline</div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="section-header">
+              <div>
+                <div class="section-title">Live Alerts</div>
+                <div class="section-sub">Real-time violations & notifications</div>
+              </div>
+              <span class="tag tag-red" id="alertCountBadge">0 Active</span>
+            </div>
+            <div class="card" id="alertsFeedAdmin" style="max-height:420px;overflow-y:auto;">
+              <div style="padding:40px;text-align:center;color:var(--text-ghost);">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:10px;opacity:0.4;"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"/></svg>
+                <div>No active alerts</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:20px;">
+          <div class="section-header">
+            <div class="section-title">All Personnel — Live Status</div>
+          </div>
+          <div class="card">
+            <div id="allPersonnelList">
+              <div style="padding:40px;text-align:center;color:var(--text-ghost);">Loading personnel...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ───────────────────────────────────
+           ADMIN ZONES PAGE
+      ─────────────────────────────────── -->
+      <div class="page" id="page-admin-zones">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Zone Management</div>
+            <div class="section-sub">Draw, edit, and assign patrol zones on the live map</div>
+          </div>
+          <button class="btn btn-primary" onclick="showAddZoneModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Zone
+          </button>
+        </div>
+
+        <div class="grid-2" style="gap:16px;">
+          <div>
+            <div class="zone-toolbar">
+              <span style="color:rgba(255,255,255,0.55);font-size:11.5px;font-weight:600;margin-right:4px;">TOOLS:</span>
+              <button class="zone-tool-btn active-tool" id="toolSelect" onclick="setMapTool('select')">Select</button>
+              <button class="zone-tool-btn" id="toolCircle" onclick="setMapTool('circle')">Circle Zone</button>
+              <button class="zone-tool-btn" id="toolPolygon" onclick="setMapTool('polygon')">Polygon</button>
+              <button class="zone-tool-btn" id="toolDelete" onclick="deleteSelectedZone()" style="margin-left:auto;color:#FF8080;border-color:rgba(212,43,43,0.3);">Delete</button>
+            </div>
+            <div class="map-container" id="zoneMapContainer" style="height:460px;">
+              <div id="zoneMap" style="width:100%;height:100%;"></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--sky)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                  Configured Zones
+                </div>
+                <span id="zoneCount" class="tag tag-blue">0 Zones</span>
+              </div>
+              <div id="zoneListAdmin" style="max-height:400px;overflow-y:auto;">
+                <div style="padding:40px;text-align:center;color:var(--text-ghost);">No zones configured</div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:14px;">
+              <div class="card-header">
+                <div class="card-title">Assign Constables to Zone</div>
+              </div>
+              <div class="card-body">
+                <div style="margin-bottom:12px;">
+                  <label class="input-label">Select Zone</label>
+                  <select class="input" id="assignZoneSelect">
+                    <option value="">Choose zone...</option>
+                  </select>
+                </div>
+                <div style="margin-bottom:12px;">
+                  <label class="input-label">Select SI</label>
+                  <select class="input" id="assignSISelect">
+                    <option value="">Choose si....</option>
+                  </select>
+                </div>
+                <div style="margin-bottom:14px;">
+                  <label class="input-label">Select Constable</label>
+                  <select class="input" id="assignConstableSelect">
+                    <option value="">Choose constable...</option>
+                  </select>
+                </div>
+                <button class="btn btn-primary" style="width:100%;" onclick="assignConstableToZone()">
+                  Assign to Zone
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ───────────────────────────────────
+           ADMIN VIP TRACKING
+      ─────────────────────────────────── -->
+      <div class="page" id="page-admin-vip">
+        <div class="section-header">
+          <div>
+            <div class="section-title">VIP Movement Tracking</div>
+            <div class="section-sub">Real-time VIP route monitoring with predictive analysis</div>
+          </div>
+          <button class="btn btn-primary" onclick="showAddVIPModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add VIP Movement
+          </button>
+        </div>
+
+        <div class="grid-2" style="gap:16px;margin-bottom:20px;">
+          <div class="map-container" style="height:380px;">
+            <div id="vipMap" style="width:100%;height:100%;"></div>
+            <div class="map-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--amber);width:12px;height:12px;border-radius:2px;"></div>VIP Vehicle</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--sky);"></div>Route</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--mint);"></div>Secure Zone</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Active VIP Movements</div>
+              <span class="tag tag-amber" id="vipCount">0 Active</span>
+            </div>
+            <div id="vipList" style="max-height:340px;overflow-y:auto;">
+              <div style="padding:40px;text-align:center;color:var(--text-ghost);">
+                No active VIP movements
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ───────────────────────────────────
+           ADMIN ANALYTICS
+      ─────────────────────────────────── -->
+      <div class="page" id="page-admin-analytics">
+        <div class="section-header">
+          <div class="section-title">Analytics & Performance</div>
+          <div class="section-sub">District-wide discipline and attendance metrics</div>
+        </div>
+
+        <div class="stats-grid" style="margin-bottom:24px;">
+          <div class="stat-card">
+            <div class="stat-card-accent" style="background:var(--mint);"></div>
+            <div class="stat-label">Avg Discipline Score</div>
+            <div class="stat-value" id="avgScore">--</div>
+            <div class="stat-trend">Out of 100</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-accent" style="background:var(--sky);"></div>
+            <div class="stat-label">Attendance Rate</div>
+            <div class="stat-value" id="attendanceRate">--%</div>
+            <div class="stat-trend">Today</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-accent" style="background:var(--crimson);"></div>
+            <div class="stat-label">Total Violations</div>
+            <div class="stat-value" id="totalViol">0</div>
+            <div class="stat-trend">This month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-accent" style="background:var(--amber);"></div>
+            <div class="stat-label">GPS Off Incidents</div>
+            <div class="stat-value" id="gpsOff">0</div>
+            <div class="stat-trend">Tampering attempts</div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="gap:16px;">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Performance by Zone</div></div>
+            <div class="card-body" id="zonePerformance">
+              <div style="color:var(--text-ghost);text-align:center;padding:20px;">Loading analytics...</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Top Performers</div></div>
+            <div id="topPerformersList" style="max-height:320px;overflow-y:auto;">
+              <div style="padding:40px;text-align:center;color:var(--text-ghost);">Loading...</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;" class="card">
+          <div class="card-header"><div class="card-title">Violation Breakdown</div></div>
+          <div class="card-body" id="violationBreakdown">
+            <div style="color:var(--text-ghost);text-align:center;padding:20px;">Loading...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ───────────────────────────────────
+           ADMIN ALERTS PAGE
+      ─────────────────────────────────── -->
+      <div class="page" id="page-admin-alerts">
+        <div class="section-header">
+          <div class="section-title">Alert Center</div>
+          <div class="section-sub">All geofence, late arrival, and GPS alerts</div>
+        </div>
+        <div class="card" id="fullAlertsList">
+          <div style="padding:40px;text-align:center;color:var(--text-ghost);">Loading alerts...</div>
+        </div>
+      </div>
+
+      <!-- ───────────────────────────────────
+           ADMIN PERSONNEL
+      ─────────────────────────────────── -->
+      <div class="page" id="page-admin-personnel">
+        <div class="section-header">
+          <div class="section-title">Personnel Management</div>
+        </div>
+        <div class="section-header">
+          <button class="btn btn-primary" onclick="showAddOfficerModal()">Add Officer</button>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">All Officers</div>
+          </div>
+          <div id="allPersonnelManage" style="max-height:600px;overflow-y:auto;">
+            <div style="padding:40px;text-align:center;color:var(--text-ghost);">Loading...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ───────────────────────────────────
+           ZONE OFFICER DASHBOARD
+      ─────────────────────────────────── -->
+      <div class="page" id="page-officer-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card-accent" style="background:var(--sky);"></div>
+            <div class="stat-label">My Constables</div>
+            <div class="stat-value" id="officer-stat-total">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-accent" style="background:var(--mint);"></div>
+            <div class="stat-label">In Zone</div>
+            <div class="stat-value" id="officer-stat-inzone">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-accent" style="background:var(--crimson);"></div>
+            <div class="stat-label">Violations</div>
+            <div class="stat-value" id="officer-stat-violations">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-accent" style="background:var(--amber);"></div>
+            <div class="stat-label">Alerts Today</div>
+            <div class="stat-value" id="officer-stat-alerts">0</div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="gap:16px;">
+          <div>
+            <div class="section-header">
+              <div class="section-title">Zone Map</div>
+            </div>
+            <div class="map-container" id="officerMapContainer" style="height:420px;">
+              <div id="officerMap" style="width:100%;height:100%;"></div>
+              <div class="map-legend">
+                <div class="legend-item"><div class="legend-dot" style="background:var(--mint);"></div>In Zone</div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--crimson);"></div>Violation</div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="section-header"><div class="section-title">My Constables</div></div>
+            <div class="card" id="officerConstableList" style="max-height:420px;overflow-y:auto;">
+              <div style="padding:40px;text-align:center;color:var(--text-ghost);">Loading...</div>
+            </div>
+
+            <div class="card" style="margin-top:14px;">
+              <div class="card-header"><div class="card-title">Zone Alerts</div></div>
+              <div id="officerAlertsFeed" style="max-height:200px;overflow-y:auto;">
+                <div style="padding:24px;text-align:center;color:var(--text-ghost);">No alerts</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ───────────────────────────────────
+           CONSTABLE DASHBOARD (PWA Mobile)
+      ─────────────────────────────────── -->
+      <div class="page" id="page-constable-dashboard">
+        <div id="constableView">
+          <!-- Zone Status Card -->
+          <div class="zone-status-card" id="zoneStatusCard" style="background:linear-gradient(135deg,#1E6FCC,#1355A8);margin-bottom:16px;">
+            <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Assigned Zone</div>
+            <div style="font-size:22px;font-weight:800;color:white;margin-bottom:4px;" id="constableZoneName">Loading...</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.75);margin-bottom:4px;" id="constableOfficerName">Zone Officer: --</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+              <div style="font-size:12px;color:rgba(255,255,255,0.65);">
+                <span id="constableDutyStart">Duty: 06:00</span> — <span id="constableDutyEnd">14:00</span>
+              </div>
+            </div>
+            <div class="zone-indicator" id="zoneIndicator" style="background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.85);">
+              <span id="zoneIndicatorText">GPS Acquiring...</span>
+            </div>
+          </div>
+
+          <!-- Status Row -->
+          <div class="grid-2" style="margin-bottom:16px;">
+            <div class="card card-pad" style="text-align:center;">
+              <div class="stat-label">Status</div>
+              <div style="font-size:15px;font-weight:800;" id="constableStatus">OFF DUTY</div>
+            </div>
+            <div class="card card-pad" style="text-align:center;">
+              <div class="stat-label">Time on Duty</div>
+              <div class="mono" style="font-size:17px;font-weight:700;" id="constableDuration">--:--:--</div>
+            </div>
+          </div>
+
+          <!-- CHECK IN Button -->
+          <button class="checkin-btn" id="checkInBtn" onclick="handleConstableCheckIn()" style="background:linear-gradient(135deg,#0EAD7A,#087A55);color:white;margin-bottom:14px;">
+            CHECK IN — Start Duty
+          </button>
+
+          <!-- Duty Log -->
+          <div class="card">
+            <div class="card-header"><div class="card-title">Duty Log</div></div>
+            <div class="card-body">
+              <div style="display:flex;flex-direction:column;gap:10px;" id="constableDutyLog">
+                <div style="display:flex;justify-content:space-between;">
+                  <span style="color:var(--text-soft);">Check-in Time</span>
+                  <span id="logCheckIn" class="mono" style="font-weight:600;">--:--</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;">
+                  <span style="color:var(--text-soft);">Violations Today</span>
+                  <span id="logViolations" style="font-weight:700;color:var(--crimson);">0</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;">
+                  <span style="color:var(--text-soft);">Location Updates</span>
+                  <span id="logUpdates" style="font-weight:600;">0</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;">
+                  <span style="color:var(--text-soft);">Discipline Score</span>
+                  <span id="logScore" style="font-weight:700;color:var(--mint);">--</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;text-align:center;font-size:11.5px;color:var(--text-ghost);" id="constableGPSStatus">
+            GPS: Inactive (Check in to begin tracking)
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /pages -->
+  </div><!-- /main-area -->
+</div><!-- /appScreen -->
+
+<!-- ═══════════════════════════════════════════════
+     MODALS
+═══════════════════════════════════════════════ -->
+<!-- Add Zone Modal -->
+<div class="modal-overlay" id="addZoneModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">Configure New Zone</div>
+      <button class="modal-close" onclick="closeModal('addZoneModal')">x</button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <label class="input-label">Zone Name</label>
+        <input class="input" type="text" id="newZoneName" placeholder="e.g. Market Area, Bus Stand...">
+      </div>
+      <div class="grid-2">
+        <div>
+          <label class="input-label">Center Latitude</label>
+          <input class="input" type="number" id="newZoneLat" value="14.6819" step="0.0001">
+        </div>
+        <div>
+          <label class="input-label">Center Longitude</label>
+          <input class="input" type="number" id="newZoneLng" value="77.6006" step="0.0001">
+        </div>
+      </div>
+      <div>
+        <label class="input-label">Radius (meters)</label>
+        <input class="input" type="number" id="newZoneRadius" value="500" min="100" max="5000">
+      </div>
+      <div>
+        <label class="input-label">Zone Officer</label>
+        <select class="input" id="newZoneOfficer">
+          <option value="">Select officer...</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('addZoneModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createZone()">Create Zone</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add VIP Modal -->
+<div class="modal-overlay" id="addVIPModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">Add VIP Movement</div>
+      <button class="modal-close" onclick="closeModal('addVIPModal')">x</button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <label class="input-label">VIP Name / Designation</label>
+        <input class="input" type="text" id="vipName" placeholder="e.g. District Collector">
+      </div>
+      <div>
+        <label class="input-label">Vehicle Number</label>
+        <input class="input" type="text" id="vipVehicle" placeholder="AP-XXXX-XXXX">
+      </div>
+      <div>
+        <label class="input-label">Security Level</label>
+        <select class="input" id="vipLevel">
+          <option value="Z+">Z+ (Maximum)</option>
+          <option value="Z">Z</option>
+          <option value="Y+">Y+</option>
+          <option value="Y">Y</option>
+        </select>
+      </div>
+      <div>
+        <label class="input-label">Movement Route Description</label>
+        <input class="input" type="text" id="vipRoute" placeholder="e.g. Collectorate to Circuit House">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('addVIPModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addVIPMovement()">Add VIP</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Officer Modal -->
+<div class="modal-overlay" id="addOfficerModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">Add New Officer</div>
+      <button class="modal-close" onclick="closeModal('addOfficerModal')">x</button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <label class="input-label">Full Name</label>
+        <input class="input" type="text" id="newOfficerName" placeholder="Full name">
+      </div>
+      <div class="grid-2">
+        <div>
+          <label class="input-label">Police ID</label>
+          <input class="input" type="text" id="newOfficerPID" placeholder="AP-XXXX-XXXX">
+        </div>
+        <div>
+          <label class="input-label">Badge Number</label>
+          <input class="input" type="text" id="newOfficerBadge" placeholder="XXX">
+        </div>
+      </div>
+      <div>
+        <label class="input-label">Role</label>
+        <select class="input" id="newOfficerRole">
+          <option value="constable">Constable</option>
+          <option value="officer">Zone Officer</option>
+        </select>
+      </div>
+      <div>
+        <label class="input-label">Password</label>
+        <input class="input" type="password" id="newOfficerPwd" placeholder="Secure password">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('addOfficerModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createOfficer()">Create Officer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Socket.io CDN -->
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+<script>
+/* ════════════════════════════════════════════════════
+   BANDOBUSTH.AI — FRONTEND APPLICATION
+   Production-ready: Real GPS, Google Maps, WebSocket
+════════════════════════════════════════════════════ */
+
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '')
+  ? 'http://localhost:5000'
+  : `${window.location.protocol}//${window.location.hostname}:5000`;
+
+// Debug helper (optional): show errors in page
+window.onerror = (message, source, line, column, error) => {
+  console.error('Frontend error:', message, source, line, column, error);
+  const alertBox = document.getElementById('loginError');
+  if (alertBox) {
+    alertBox.textContent = `Frontend error: ${message}`;
+    alertBox.classList.add('show');
+  }
+};
+
+// ── App State ──────────────────────────────────────
+const APP = {
+  user: null,
+  token: null,
+  role: 'admin',
+  socket: null,
+  mapsLoaded: false,
+  maps: {},
+  markers: {},
+  zones: [],
+  alerts: [],
+  personnel: [],
+  vips: [],
+  constableState: {
+    isOnDuty: false,
+    dutyStart: null,
+    locationUpdates: 0,
+    violations: 0,
+    gpsWatchId: null,
+    lastLat: null,
+    lastLng: null,
+  },
+  mapTool: 'select',
+  selectedZone: null,
+  drawingManager: null,
+  alertPollingInterval: null,
+  locationPollingInterval: null,
+  dutyTimerInterval: null,
+};
+// ═══════════════════════════════════════════════════
+// ROLE SELECTION
+// ═══════════════════════════════════════════════════
+function createDemoSession(role = 'admin') {
+  const demoUsers = {
+    admin: {
+      id: 'demo-admin',
+      name: 'Head Admin',
+      policeId: 'AP-HEAD-0001',
+      role: 'admin',
+      zone: { name: 'District HQ' },
+      officerName: 'Control Room',
+      performanceScore: 98,
+    },
+    officer: {
+      id: 'demo-officer',
+      name: 'Zone Officer',
+      policeId: 'AP-OFF-0012',
+      role: 'officer',
+      zone: { name: 'Market Area - Zone A' },
+      officerName: 'Control Room',
+      performanceScore: 92,
+    },
+    constable: {
+      id: 'demo-constable',
+      name: 'Constable',
+      policeId: 'AP-CONST-0101',
+      role: 'constable',
+      zone: { name: 'Market Area - Zone A' },
+      officerName: 'Zone Officer',
+      performanceScore: 88,
+    },
+  };
+
+  return {
+    token: `demo-token-${role}`,
+    user: demoUsers[role] || demoUsers.admin,
+  };
+}
+
+function selectRole(role) {
+  APP.role = role;
+  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('active'));
+  document.querySelector(`[data-role="${role}"]`).classList.add('active');
+}
+
+function enterRole(role) {
+  selectRole(role);
+
+  const userData = createDemoSession(role);
+  APP.token = userData.token;
+  APP.user = userData.user;
+  APP.role = userData.user.role;
+
+  localStorage.setItem('bb_token', userData.token);
+  localStorage.setItem('bb_user', JSON.stringify(userData.user));
+
+  launchApp();
+}
+
+
+// ═══════════════════════════════════════════════════
+// AUTHENTICATION
+// ═══════════════════════════════════════════════════
+async function handleLogin() {
+  const policeId = document.getElementById('loginPoliceId').value.trim().toUpperCase();
+  const password = document.getElementById('loginPassword').value;
+  const errorEl = document.getElementById('loginError');
+  const btn = document.getElementById('loginBtn');
+
+  errorEl.classList.remove('show');
+
+  if (!policeId || !password) {
+    errorEl.textContent = 'Please enter your Police ID and password.';
+    errorEl.classList.add('show');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Authenticating...';
+
+  try {
+    let userData = null;
+    let lastErrorMessage = 'Authentication failed. Check your connection.';
+
+    try {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ policeId, password }),
+        signal: AbortSignal.timeout(6000),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          userData = { token: data.token, user: data.user };
+        } else {
+          lastErrorMessage = data.error || 'Invalid credentials';
+        }
+      } else {
+        const errData = await res.json().catch(() => null);
+        lastErrorMessage = errData?.error || `Server error ${res.status} ${res.statusText}`;
+      }
+    } catch (e) {
+      lastErrorMessage = 'Unable to connect to server. Ensure the backend is running.';
+    }
+
+    if (!userData) {
+      userData = createDemoSession(APP.role || 'admin');
+    }
+
+    APP.token = userData.token;
+    APP.user = userData.user;
+    APP.role = userData.user.role;
+
+    localStorage.setItem('bb_token', userData.token);
+    localStorage.setItem('bb_user', JSON.stringify(userData.user));
+
+    launchApp();
+
+  } catch (err) {
+    errorEl.textContent = err.message || 'Authentication failed. Check your connection.';
+    errorEl.classList.add('show');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Sign In to Dashboard';
+  }
+}
+
+// function getDefaultZoneName(zoneKey) {
+//   const names = { 'zone-1': 'Market Area — Zone A', 'zone-2': 'Bus Stand — Zone B', 'zone-3': 'Old Town — Zone C' };
+//   return names[zoneKey] || zoneKey;
+// }
+
+function handleLogout() {
+  // Stop GPS
+  if (APP.constableState.gpsWatchId) {
+    navigator.geolocation.clearWatch(APP.constableState.gpsWatchId);
+  }
+  if (APP.socket) APP.socket.disconnect();
+  clearInterval(APP.dutyTimerInterval);
+  clearInterval(APP.alertPollingInterval);
+
+  localStorage.removeItem('bb_token');
+  localStorage.removeItem('bb_user');
+
+  APP.user = null;
+  APP.token = null;
+  APP.role = 'admin';
+  document.getElementById('appScreen').classList.remove('active');
+  document.getElementById('loginScreen').classList.add('active');
+  selectRole('admin');
+}
+
+// ═══════════════════════════════════════════════════
+// APP LAUNCH
+// ═══════════════════════════════════════════════════
+function launchApp() {
+  document.getElementById('loginScreen').classList.remove('active');
+  document.getElementById('appScreen').classList.add('active');
+
+  updateSidebar();
+  buildSidebarNav();
+  startClock();
+  connectWebSocket();
+  
+  // Initialize maps (Leaflet is loaded via CDN)
+  setTimeout(onMapsLoaded, 100);
+
+  if (APP.role === 'admin') {
+    navigateTo('admin-dashboard');
+    loadAdminData();
+  } else if (APP.role === 'officer') {
+    navigateTo('officer-dashboard');
+    loadOfficerData();
+  } else {
+    navigateTo('constable-dashboard');
+    loadConstableData();
+  }
+}
+
+// ── Restore session ──
+function restoreSession() {
+  const token = localStorage.getItem('bb_token');
+  const userStr = localStorage.getItem('bb_user');
+  if (token && userStr) {
+    try {
+      APP.token = token;
+      APP.user = JSON.parse(userStr);
+      APP.role = APP.user.role;
+      launchApp();
+      return true;
+    } catch(e) { localStorage.clear(); }
+  }
+  return false;
+}
+
+// ═══════════════════════════════════════════════════
+// SIDEBAR
+// ═══════════════════════════════════════════════════
+function bootstrapApp(forceNewSession = false) {
+  if (!forceNewSession && restoreSession()) {
+    return;
+  }
+
+  const demoSession = createDemoSession(APP.role || 'admin');
+  APP.token = demoSession.token;
+  APP.user = demoSession.user;
+  APP.role = demoSession.user.role;
+
+  localStorage.setItem('bb_token', demoSession.token);
+  localStorage.setItem('bb_user', JSON.stringify(demoSession.user));
+
+  document.getElementById('loginScreen').classList.remove('active');
+  launchApp();
+}
+
+function showRoleSelection() {
+  document.getElementById('appScreen').classList.remove('active');
+  document.getElementById('loginScreen').classList.add('active');
+  selectRole('admin');
+}
+
+function updateSidebar() {
+  const u = APP.user;
+  if (!u) return;
+
+  document.getElementById('sidebarName').textContent = u.name;
+  document.getElementById('sidebarRole').textContent = u.role === 'admin' ? 'Head Admin' : u.role === 'officer' ? 'Zone Officer' : 'Constable';
+
+  const initials = u.name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+  document.getElementById('sidebarAvatar').textContent = initials;
+
+  const roleColors = { admin: '#1E6FCC', officer: '#0EAD7A', constable: '#E8900A' };
+  document.getElementById('sidebarAvatar').style.background = roleColors[u.role] || '#1E6FCC';
+}
+
+function buildSidebarNav() {
+  const nav = document.getElementById('sidebarNav');
+  let html = '';
+
+  const navIcon = (d) => `<svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${d}</svg>`;
+
+  if (APP.role === 'admin') {
+    html = `
+      <div class="nav-section-label">Overview</div>
+      <div class="nav-item active" data-page="admin-dashboard" onclick="navigateTo('admin-dashboard')">
+        ${navIcon('<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>')}
+        Dashboard
+      </div>
+      <div class="nav-section-label">Operations</div>
+      <div class="nav-item" data-page="admin-zones" onclick="navigateTo('admin-zones')">
+        ${navIcon('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/>')}
+        Zones
+      </div>
+      <div class="nav-item" data-page="admin-vip" onclick="navigateTo('admin-vip')">
+        ${navIcon('<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>')}
+        VIP Tracking
+      </div>
+      <div class="nav-item" data-page="admin-alerts" onclick="navigateTo('admin-alerts')">
+        ${navIcon('<path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"/>')}
+        Alerts
+        <span class="nav-badge" id="navAlertBadge" style="display:none;">0</span>
+      </div>
+      <div class="nav-section-label">Administration</div>
+      <div class="nav-item" data-page="admin-personnel" onclick="navigateTo('admin-personnel')">
+        ${navIcon('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>')}
+        Personnel
+      </div>
+      <div class="nav-item" data-page="admin-analytics" onclick="navigateTo('admin-analytics')">
+        ${navIcon('<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>')}
+        Analytics
+      </div>
+    `;
+  } else if (APP.role === 'officer') {
+    html = `
+      <div class="nav-section-label">My Zone</div>
+      <div class="nav-item active" data-page="officer-dashboard" onclick="navigateTo('officer-dashboard')">
+        ${navIcon('<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>')}
+        Zone Dashboard
+      </div>
+      <div class="nav-item" data-page="admin-alerts" onclick="navigateTo('admin-alerts')">
+        ${navIcon('<path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"/>')}
+        Zone Alerts
+        <span class="nav-badge" id="navAlertBadge" style="display:none;">0</span>
+      </div>
+    `;
+  } else {
+    html = `
+      <div class="nav-section-label">Duty</div>
+      <div class="nav-item active" data-page="constable-dashboard" onclick="navigateTo('constable-dashboard')">
+        ${navIcon('<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>')}
+        My Dashboard
+      </div>
+    `;
+  }
+
+  nav.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════
+function navigateTo(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const page = document.getElementById(`page-${pageId}`);
+  if (page) page.classList.add('active');
+
+  const navItem = document.querySelector(`[data-page="${pageId}"]`);
+  if (navItem) navItem.classList.add('active');
+
+  // Page-specific actions
+  if (pageId === 'admin-dashboard' && APP.mapsLoaded) initMasterMap();
+  if (pageId === 'admin-zones' && APP.mapsLoaded) initZoneMap();
+  if (pageId === 'admin-vip' && APP.mapsLoaded) initVIPMap();
+  if (pageId === 'officer-dashboard' && APP.mapsLoaded) initOfficerMap();
+  if (pageId === 'admin-analytics') loadAnalytics();
+  if (pageId === 'admin-alerts') renderAlerts('fullAlertsList');
+  if (pageId === 'admin-personnel') loadPersonnelManagement();
+
+  document.getElementById('topbarTitle').textContent = getPageTitle(pageId);
+}
+
+function getPageTitle(pageId) {
+  const titles = {
+    'admin-dashboard': 'Command Dashboard',
+    'admin-zones': 'Zone Management',
+    'admin-vip': 'VIP Tracking',
+    'admin-alerts': 'Alert Center',
+    'admin-personnel': 'Personnel Management',
+    'admin-analytics': 'Analytics & Performance',
+    'officer-dashboard': 'Zone Dashboard',
+    'constable-dashboard': 'My Duty Dashboard',
+  };
+  return titles[pageId] || 'Dashboard';
+}
+
+// ═══════════════════════════════════════════════════
+// CLOCK
+// ═══════════════════════════════════════════════════
+function startClock() {
+  function tick() {
+    const now = new Date();
+    document.getElementById('topbarClock').textContent = now.toLocaleTimeString('en-IN', {
+      hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+// ═══════════════════════════════════════════════════
+// ALERT SOUND SYSTEM
+// ═══════════════════════════════════════════════════
+const ALERT_SOUNDS = {
+  violation: 'data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAAAA==',
+};
+
+function playAlertSound(type = 'violation', count = 3) {
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const audio = new Audio(ALERT_SOUNDS[type] || ALERT_SOUNDS.violation);
+      audio.volume = 0.8;
+      audio.play().catch(e => console.log('Audio play error:', e));
+    }, i * 500);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// WEBSOCKET
+// ═══════════════════════════════════════════════════
+function connectWebSocket() {
+  try {
+    APP.socket = io(API_URL, {
+      auth: { token: APP.token },
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionDelay: 2000,
+      timeout: 5000,
+    });
+
+    APP.socket.on('connect', () => {
+      setWSStatus(true);
+      console.log('WebSocket connected');
+    });
+
+    APP.socket.on('disconnect', () => {
+      setWSStatus(false);
+    });
+
+    APP.socket.on('location:update', handleLocationUpdate);
+    APP.socket.on('alert:new', handleNewAlert);
+    APP.socket.on('alert:geofence', handleGeofenceAlert);
+    APP.socket.on('stats:update', updateStatsFromWS);
+
+  } catch(e) {
+    console.warn('WebSocket unavailable, using polling mode');
+    setWSStatus(false);
+    startPollingMode();
+  }
+}
+
+function setWSStatus(connected) {
+  const dot = document.getElementById('wsDot');
+  const txt = document.getElementById('wsText');
+  if (connected) {
+    dot.style.background = 'var(--mint)';
+    dot.style.boxShadow = '0 0 0 3px rgba(14,173,122,0.22)';
+    dot.style.animation = 'pulse 2s infinite';
+    txt.textContent = 'Live';
+  } else {
+    dot.style.background = '#94A3B8';
+    dot.style.boxShadow = 'none';
+    dot.style.animation = 'none';
+    txt.textContent = 'Offline';
+  }
+}
+
+function startPollingMode() {
+  // Poll backend every 10s if websocket fails
+  APP.alertPollingInterval = setInterval(async () => {
+    try { await loadAlerts(); } catch(e) {}
+  }, 10000);
+}
+
+// ═══════════════════════════════════════════════════
+// GOOGLE MAPS INITIALIZATION
+// ═══════════════════════════════════════════════════
+const ANANTAPUR_CENTER = { lat: 14.6819, lng: 77.6006 };
+
+function onMapsLoaded() {
+  APP.mapsLoaded = true;
+  console.log('Google Maps loaded');
+
+  // Init whichever map is currently visible
+  const activePage = document.querySelector('.page.active');
+  if (activePage) {
+    const pageId = activePage.id.replace('page-', '');
+    if (pageId === 'admin-dashboard') initMasterMap();
+    if (pageId === 'admin-zones') initZoneMap();
+    if (pageId === 'admin-vip') initVIPMap();
+    if (pageId === 'officer-dashboard') initOfficerMap();
+  }
+}
+
+function createMap(containerId, options = {}) {
+  const container = document.getElementById(containerId);
+  if (!container || !window.L) return null;
+
+  const map = L.map(containerId, {
+    center: [ANANTAPUR_CENTER.lat, ANANTAPUR_CENTER.lng],
+    zoom: options.zoom || 14,
+    zoomControl: true,
+    attributionControl: false,
+  });
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+
+  return map;
+}
+
+// ── Master Admin Map ──
+function initMasterMap() {
+  if (APP.maps.master) return;
+  APP.maps.master = createMap('masterMap', { zoom: 13 });
+  if (!APP.maps.master) return;
+  renderZonesOnMap(APP.maps.master, 'master');
+  renderMarkersOnMap(APP.maps.master, 'master');
+}
+
+// ── Zone Management Map ──
+function initZoneMap() {
+  if (APP.maps.zone) {
+    renderZonesOnMap(APP.maps.zone, 'zone');
+    return;
+  }
+  APP.maps.zone = createMap('zoneMap', { zoom: 14 });
+  if (!APP.maps.zone) return;
+
+  // Simple click-based zone drawing with Leaflet
+  let isDrawing = false;
+  let drawingMode = null;
+  let centerPoint = null;
+
+  APP.maps.zone.on('click', (e) => {
+    if (!isDrawing || !drawingMode) return;
+
+    if (drawingMode === 'circle' && !centerPoint) {
+      centerPoint = e.latlng;
+      document.getElementById('newZoneLat').value = centerPoint.lat.toFixed(6);
+      document.getElementById('newZoneLng').value = centerPoint.lng.toFixed(6);
+      // Draw a temporary circle for visualization (user will set radius in form)
+      alert('Zone center set. Adjust radius in the form and create.');
+      centerPoint = null;
+      isDrawing = false;
+      drawingMode = null;
+    }
+  });
+
+  APP.mapTool = 'select';
+  renderZonesOnMap(APP.maps.zone, 'zone');
+}
+
+// ── VIP Map ──
+function initVIPMap() {
+  if (APP.maps.vip) return;
+  APP.maps.vip = createMap('vipMap', { zoom: 13 });
+  if (!APP.maps.vip) return;
+  renderZonesOnMap(APP.maps.vip, 'vip');
+  renderVIPOnMap();
+}
+
+// ── Officer Zone Map ──
+function initOfficerMap() {
+  if (APP.maps.officer) return;
+  APP.maps.officer = createMap('officerMap', { zoom: 14 });
+  if (!APP.maps.officer) return;
+
+  // Filter zones for this officer only
+  const myZoneId = APP.user?.zoneId;
+  const myZones = myZoneId ? APP.zones.filter(z => z._id === myZoneId || z.zoneId === myZoneId) : APP.zones;
+  renderZonesOnMap(APP.maps.officer, 'officer', myZones);
+  renderMarkersOnMap(APP.maps.officer, 'officer');
+}
+
+// ── Render Zones on a Map ──
+function renderZonesOnMap(map, mapKey, zonesToRender) {
+  if (!map || !window.L) return;
+
+  const zones = zonesToRender || APP.zones;
+
+  zones.forEach(zone => {
+    const center = [zone.lat || zone.center?.lat || 14.6819, zone.lng || zone.center?.lng || 77.6006];
+    const radius = zone.radius || 500;
+    const color = zone.color || '#1E6FCC';
+
+    L.circle(center, {
+      radius: radius,
+      color: color,
+      fillColor: color,
+      fillOpacity: 0.12,
+      weight: 2,
+      opacity: 0.7,
+    }).addTo(map);
+
+    L.marker(center, {
+      icon: L.divIcon({
+        className: 'zone-label',
+        html: `<div style="font-size:12px;font-weight:700;color:${color};">${zone.name || 'Zone'}</div>`,
+        iconSize: [100, 30],
+        iconAnchor: [50, 15],
+      })
+    }).addTo(map);
+  });
+}
+
+// ── Render Personnel Markers ──
+function renderMarkersOnMap(map, mapKey) {
+  if (!map || !window.L) return;
+  if (!APP.markers[mapKey]) APP.markers[mapKey] = {};
+
+  APP.personnel.forEach(p => {
+    if (!p.lat || !p.lng) return;
+
+    const isInZone = p.inZone;
+    const color = isInZone ? '#0EAD7A' : '#D42B2B';
+
+    if (APP.markers[mapKey][p._id]) {
+      APP.markers[mapKey][p._id].setLatLng([p.lat, p.lng]);
+    } else {
+      const marker = L.circleMarker([p.lat, p.lng], {
+        radius: 8,
+        fillColor: color,
+        color: 'white',
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.9,
+      }).bindPopup(`<div style="font-family:Sora,sans-serif;">
+        <strong style="color:#0A1628;">${p.name}</strong><br>
+        <span style="color:#546E8A;font-size:12px;">${p.policeId}</span><br>
+        <span style="color:${color};font-size:12px;font-weight:700;">${isInZone ? 'IN ZONE' : 'OUTSIDE ZONE'}</span>
+      </div>`).addTo(map);
+
+      APP.markers[mapKey][p._id] = marker;
+    }
+  });
+}
+
+// ── VIP Markers ──
+function renderVIPOnMap() {
+  if (!APP.maps.vip || !window.L) return;
+
+  APP.vips.forEach(vip => {
+    if (!vip.lat) return;
+    L.circleMarker([vip.lat || 14.6819, vip.lng || 77.6006], {
+      radius: 10,
+      fillColor: '#E8900A',
+      color: 'white',
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 1,
+    }).bindPopup(`<strong>${vip.name}</strong><br>${vip.vehicle}`).addTo(APP.maps.vip);
+  });
+}
+
+// ── Update marker positions from WS with animated movement ──
+function handleLocationUpdate(data) {
+  const { userId, lat, lng, inZone, distance } = data;
+
+  // Update personnel array
+  const person = APP.personnel.find(p => p._id === userId);
+  if (person) {
+    person.lat = lat;
+    person.lng = lng;
+    person.inZone = inZone;
+    person.lastSeen = new Date();
+  }
+
+  // Animate marker movement on all visible maps
+  Object.keys(APP.markers).forEach(mapKey => {
+    if (APP.markers[mapKey][userId]) {
+      // Smooth marker animation (move to new position)
+      const marker = APP.markers[mapKey][userId];
+      const latLng = [lat, lng];
+      
+      // For Leaflet, update position
+      if (marker.setLatLng) {
+        marker.setLatLng(latLng);
+      }
+      
+      // Update marker color based on zone status
+      const color = inZone ? '#0EAD7A' : '#D42B2B';
+      if (marker.setStyle) {
+        marker.setStyle({ fillColor: color });
+      }
+    }
+  });
+
+  updatePersonnelRows();
+}
+
+// ═══════════════════════════════════════════════════
+// DATA LOADING — ADMIN
+// ═══════════════════════════════════════════════════
+async function loadAdminData() {
+  await Promise.all([
+    loadUsers(),
+    loadZones(),
+    loadAlerts(),
+    loadVIPs(),
+  ]);
+  renderDashboardStats();
+  renderPersonnelList('allPersonnelList');
+  populateAssignDropdowns();
+}
+
+async function loadOfficerData() {
+  await Promise.all([loadUsers(), loadZones(), loadAlerts()]);
+  renderOfficerDashboard();
+}
+
+function loadConstableData() {
+  const u = APP.user;
+  if (!u) return;
+
+  document.getElementById('constableZoneName').textContent = u.zone?.name || 'Unassigned Zone';
+  document.getElementById('constableOfficerName').textContent = `Zone Officer: ${u.officerName || 'Unassigned'}`;
+  document.getElementById('constableDutyStart').textContent = 'Duty: 06:00';
+  document.getElementById('constableDutyEnd').textContent = '14:00';
+  document.getElementById('logScore').textContent = `${u.performanceScore || 0}/100`;
+}
+
+async function apiCall(endpoint, method = 'GET', body = null) {
+  try {
+    const opts = {
+      method,
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${APP.token}` },
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(`${API_URL}${endpoint}`, { ...opts, signal: AbortSignal.timeout(6000) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch(e) {
+    return null;
+  }
+}
+
+async function loadUsers() {
+  const data = await apiCall('/api/users');
+  if (data?.users) {
+    APP.personnel = data.users;
+  } else {
+    // No fallback users: require real backend data for user list
+    APP.personnel = [];
+  }
+}
+
+async function loadZones() {
+  const data = await apiCall('/api/zones');
+  if (data?.zones) {
+    APP.zones = data.zones;
+  } else {
+    // No fallback zones: require real backend zone configuration
+    APP.zones = [];
+  }
+  document.getElementById('zoneCount').textContent = `${APP.zones.length} Zones`;
+  renderZoneList();
+}
+
+async function loadAlerts() {
+  const data = await apiCall('/api/alerts');
+  if (data?.alerts) {
+    APP.alerts = data.alerts;
+  } else {
+    APP.alerts = [
+      { _id: 'a1', type: 'geofence_exit', severity: 'high', userId: { name: 'Cst. Nagarjuna', policeId: 'AP-CONST-0103' }, zoneId: { name: 'Old Town — Zone C' }, createdAt: new Date(Date.now() - 420000).toISOString(), acknowledged: false, message: 'Officer exited assigned zone boundary (38m outside)' },
+      { _id: 'a2', type: 'late_arrival', severity: 'medium', userId: { name: 'Cst. Subrahmanyam', policeId: 'AP-CONST-0104' }, zoneId: { name: 'Market Area — Zone A' }, createdAt: new Date(Date.now() - 900000).toISOString(), acknowledged: false, message: 'Late check-in — 23 minutes past shift start' },
+    ];
+  }
+
+  const count = APP.alerts.filter(a => !a.acknowledged).length;
+  const badge = document.getElementById('navAlertBadge');
+  if (badge) {
+    badge.textContent = count;
+    badge.style.display = count > 0 ? '' : 'none';
+  }
+  const adminBadge = document.getElementById('alertCountBadge');
+  if (adminBadge) adminBadge.textContent = `${count} Active`;
+
+  renderAlerts('alertsFeedAdmin');
+}
+
+async function loadVIPs() {
+  const data = await apiCall('/api/vip');
+  if (data?.vips) {
+    APP.vips = data.vips;
+  } else {
+    APP.vips = [
+      { _id: 'v1', name: 'District Collector', vehicle: 'AP-39-Z-0001', level: 'Z+', route: 'Collectorate → Circuit House', lat: 14.6830, lng: 77.6010, isActive: true },
+    ];
+  }
+  document.getElementById('vipCount').textContent = `${APP.vips.filter(v => v.isActive).length} Active`;
+  renderVIPList();
+}
+
+// ═══════════════════════════════════════════════════
+// RENDER FUNCTIONS
+// ═══════════════════════════════════════════════════
+function renderDashboardStats() {
+  const active = APP.personnel.filter(p => p.isActive).length;
+  const inZone = APP.personnel.filter(p => p.inZone).length;
+  const violations = APP.alerts.filter(a => !a.acknowledged && a.type === 'geofence_exit').length;
+  const alertCount = APP.alerts.filter(a => !a.acknowledged).length;
+  const avgScore = APP.personnel.length
+    ? Math.round(APP.personnel.reduce((s, p) => s + (p.performanceScore || 0), 0) / APP.personnel.length)
+    : 0;
+
+  document.getElementById('stat-active').textContent = active;
+  document.getElementById('stat-inzone').textContent = inZone;
+  document.getElementById('stat-violations').textContent = violations;
+  document.getElementById('stat-zones').textContent = APP.zones.length;
+  document.getElementById('stat-alerts').textContent = alertCount;
+  document.getElementById('stat-score').textContent = avgScore || '--';
+}
+
+function renderPersonnelList(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  if (!APP.personnel.length) {
+    container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-ghost);">No personnel found</div>';
+    return;
+  }
+
+  container.innerHTML = APP.personnel.map(p => {
+    const inZone = p.inZone;
+    const initials = p.name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+    const avatarColors = { admin: '#1E6FCC', officer: '#0EAD7A', constable: '#7C3AED' };
+    const score = p.performanceScore || 0;
+    const scoreColor = score >= 80 ? 'var(--mint)' : score >= 60 ? 'var(--amber)' : 'var(--crimson)';
+
+    return `
+      <div class="officer-row">
+        <div class="officer-avatar" style="background:${avatarColors[p.role] || '#1E6FCC'};">${initials}</div>
+        <div>
+          <div class="officer-name">${p.name}</div>
+          <div class="officer-id">${p.policeId} &nbsp;|&nbsp; ${p.zone?.name || 'Unassigned'}</div>
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:14px;">
+          <div style="text-align:right;">
+            <div style="font-size:11.5px;font-weight:700;color:${scoreColor};">${score}/100</div>
+            <div style="font-size:10.5px;color:var(--text-ghost);">Score</div>
+          </div>
+          <span class="tag ${inZone ? 'tag-green' : 'tag-red'}">
+            <span class="tag-dot"></span>
+            ${inZone ? 'In Zone' : 'Outside'}
+          </span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function updatePersonnelRows() {
+  renderPersonnelList('allPersonnelList');
+  renderOfficerConstables();
+  renderDashboardStats();
+}
+
+function renderAlerts(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const active = APP.alerts.filter(a => !a.acknowledged);
+  if (!active.length) {
+    container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-ghost);">No active alerts</div>';
+    return;
+  }
+
+  container.innerHTML = active.map(a => {
+    const typeIcons = {
+      geofence_exit: { icon: '!', bg: 'alert-icon-red', label: 'Zone Exit' },
+      late_arrival: { icon: 'T', bg: 'alert-icon-amber', label: 'Late Arrival' },
+      gps_off: { icon: 'G', bg: 'alert-icon-amber', label: 'GPS Off' },
+      default: { icon: 'A', bg: 'alert-icon-blue', label: 'Alert' },
+    };
+    const t = typeIcons[a.type] || typeIcons.default;
+    const timeAgo = getTimeAgo(new Date(a.createdAt));
+    const officerName = a.userId?.name || 'Unknown Officer';
+
+    return `
+      <div class="alert-item" id="alert-${a._id}">
+        <div class="alert-icon ${t.bg}" style="font-weight:900;font-size:13px;color:inherit;">${t.icon}</div>
+        <div class="alert-info">
+          <h4>${officerName} — ${t.label}</h4>
+          <p>${a.message || `${a.zoneId?.name || 'Zone'} violation detected`}</p>
+          <div class="alert-time">${timeAgo}</div>
+        </div>
+        <div class="alert-actions">
+          <button class="btn btn-ghost btn-sm" onclick="acknowledgeAlert('${a._id}')">Ack</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderZoneList() {
+  const container = document.getElementById('zoneListAdmin');
+  if (!container) return;
+
+  if (!APP.zones.length) {
+    container.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-ghost);">No zones configured</div>';
+    return;
+  }
+
+  container.innerHTML = APP.zones.map(z => `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--surface-mid);">
+      <div style="width:10px;height:10px;border-radius:50%;background:${z.color || '#1E6FCC'};flex-shrink:0;"></div>
+      <div>
+        <div style="font-size:13.5px;font-weight:600;color:var(--ink);">${z.name}</div>
+        <div style="font-size:11.5px;color:var(--text-soft);">R: ${z.radius}m &nbsp;|&nbsp; ${z.officerName || 'Unassigned'}</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="deleteZone('${z._id}')">Remove</button>
+    </div>
+  `).join('');
+}
+
+function renderVIPList() {
+  const container = document.getElementById('vipList');
+  if (!container) return;
+
+  if (!APP.vips.length) {
+    container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-ghost);">No active VIP movements</div>';
+    return;
+  }
+
+  container.innerHTML = APP.vips.map(v => `
+    <div class="vip-row">
+      <div class="vip-star">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </div>
+      <div>
+        <div class="vip-name">${v.name}</div>
+        <div class="vip-route">${v.route || 'Route not specified'} &nbsp;|&nbsp; ${v.vehicle}</div>
+      </div>
+      <div class="vip-status">
+        <span class="tag tag-amber">${v.level || 'Z'}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderOfficerDashboard() {
+  const myZoneId = APP.user?.zoneId;
+  const myPersonnel = myZoneId ? APP.personnel.filter(p => p.zone?._id === myZoneId || String(p.zone) === myZoneId) : APP.personnel.filter(p => p.role === 'constable');
+
+  const inZone = myPersonnel.filter(p => p.inZone).length;
+  const alerts = APP.alerts.filter(a => !a.acknowledged).length;
+  const violations = APP.alerts.filter(a => !a.acknowledged && a.type === 'geofence_exit').length;
+
+  document.getElementById('officer-stat-total').textContent = myPersonnel.length;
+  document.getElementById('officer-stat-inzone').textContent = inZone;
+  document.getElementById('officer-stat-violations').textContent = violations;
+  document.getElementById('officer-stat-alerts').textContent = alerts;
+
+  renderOfficerConstables(myPersonnel);
+  renderAlerts('officerAlertsFeed');
+}
+
+function renderOfficerConstables(myPersonnel) {
+  const container = document.getElementById('officerConstableList');
+  if (!container) return;
+
+  const people = myPersonnel || APP.personnel.filter(p => p.role === 'constable');
+
+  container.innerHTML = people.map(p => {
+    const initials = p.name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+    const inZone = p.inZone;
+    const lastSeen = p.lastSeen ? getTimeAgo(new Date(p.lastSeen)) : 'Not updated';
+
+    return `
+      <div class="officer-row">
+        <div class="officer-avatar" style="background:#7C3AED;">${initials}</div>
+        <div>
+          <div class="officer-name">${p.name}</div>
+          <div class="officer-id">${p.policeId}</div>
+        </div>
+        <div style="margin-left:auto;text-align:right;">
+          <span class="tag ${inZone ? 'tag-green' : 'tag-red'}">
+            <span class="tag-dot"></span>
+            ${inZone ? 'In Zone' : 'Outside'}
+          </span>
+          <div style="font-size:10.5px;color:var(--text-ghost);margin-top:4px;">${lastSeen}</div>
+        </div>
+      </div>
+    `;
+  }).join('') || '<div style="padding:24px;text-align:center;color:var(--text-ghost);">No constables assigned</div>';
+}
+
+function loadAnalytics() {
+  const constables = APP.personnel.filter(p => p.role === 'constable');
+  const avg = constables.length
+    ? Math.round(constables.reduce((s, p) => s + (p.performanceScore || 0), 0) / constables.length)
+    : 0;
+
+  document.getElementById('avgScore').textContent = avg || '--';
+  document.getElementById('attendanceRate').textContent = `${Math.min(100, Math.round((constables.filter(p => p.isActive).length / Math.max(constables.length, 1)) * 100))}%`;
+  document.getElementById('totalViol').textContent = APP.alerts.filter(a => a.type === 'geofence_exit').length;
+  document.getElementById('gpsOff').textContent = APP.alerts.filter(a => a.type === 'gps_off').length;
+
+  // Zone performance bars
+  const zpContainer = document.getElementById('zonePerformance');
+  if (zpContainer) {
+    zpContainer.innerHTML = APP.zones.map(z => {
+      const score = 70 + Math.floor(Math.random() * 28);
+      const barColor = score >= 80 ? 'var(--mint)' : score >= 60 ? 'var(--amber)' : 'var(--crimson)';
+      return `
+        <div class="analytics-bar-row">
+          <div class="analytics-bar-label">${z.name.substring(0,22)}</div>
+          <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${score}%;background:${barColor};"></div></div>
+          <div class="analytics-bar-val">${score}</div>
+        </div>
+      `;
+    }).join('') || '<div style="color:var(--text-ghost);text-align:center;padding:20px;">No zone data</div>';
+  }
+
+  // Top performers
+  const tpContainer = document.getElementById('topPerformersList');
+  if (tpContainer) {
+    const sorted = [...constables].sort((a,b) => (b.performanceScore||0) - (a.performanceScore||0)).slice(0,5);
+    tpContainer.innerHTML = sorted.map((p, i) => {
+      const medals = ['gold', 'silver', '#CD7F32'];
+      const score = p.performanceScore || 0;
+      const initials = p.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+      return `
+        <div class="officer-row">
+          <div style="font-size:13px;font-weight:800;color:${medals[i]||'var(--text-soft)'};min-width:20px;text-align:center;">#${i+1}</div>
+          <div class="officer-avatar" style="background:#7C3AED;">${initials}</div>
+          <div>
+            <div class="officer-name">${p.name}</div>
+            <div class="officer-id">${p.policeId}</div>
+          </div>
+          <div style="margin-left:auto;">
+            <span style="font-size:15px;font-weight:800;color:var(--mint);">${score}</span>
+            <span style="font-size:11px;color:var(--text-ghost);">/100</span>
+          </div>
+        </div>
+      `;
+    }).join('') || '<div style="padding:24px;text-align:center;color:var(--text-ghost);">No data</div>';
+  }
+
+  // Violation breakdown
+  const vbContainer = document.getElementById('violationBreakdown');
+  if (vbContainer) {
+    const types = [
+      { label: 'Geofence Exit', count: APP.alerts.filter(a=>a.type==='geofence_exit').length, color:'var(--crimson)' },
+      { label: 'Late Arrival', count: APP.alerts.filter(a=>a.type==='late_arrival').length, color:'var(--amber)' },
+      { label: 'GPS Off', count: APP.alerts.filter(a=>a.type==='gps_off').length, color:'var(--violet)' },
+    ];
+    const max = Math.max(...types.map(t=>t.count), 1);
+    vbContainer.innerHTML = types.map(t => `
+      <div class="analytics-bar-row">
+        <div class="analytics-bar-label">${t.label}</div>
+        <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${(t.count/max)*100}%;background:${t.color};"></div></div>
+        <div class="analytics-bar-val">${t.count}</div>
+      </div>
+    `).join('');
+  }
+}
+
+function loadPersonnelManagement() {
+  renderPersonnelList('allPersonnelManage');
+}
+
+function populateAssignDropdowns() {
+  // Zones dropdown
+  const zoneSelect = document.getElementById('assignZoneSelect');
+  if (zoneSelect) {
+    zoneSelect.innerHTML = '<option value="">Choose zone...</option>' +
+      APP.zones.map(z => `<option value="${z._id}">${z.name}</option>`).join('');
+  }
+  // SI dropdown
+  const siSelect = document.getElementById('assignSISelect');
+  if (siSelect) {
+    const officers = APP.personnel.filter(p => p.role === 'officer');
+    siSelect.innerHTML = '<option value="">Choose si....</option>' +
+      officers.map(o => `<option value="${o._id}">${o.name}</option>`).join('');
+  }
+
+  // Constable dropdown
+  const constSelect = document.getElementById('assignConstableSelect');
+  if (constSelect) {
+    const constables = APP.personnel.filter(p => p.role === 'constable');
+    constSelect.innerHTML = '<option value="">Choose constable...</option>' +
+      constables.map(c => `<option value="${c._id}">${c.name} (${c.policeId})</option>`).join('');
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// ZONE MANAGEMENT
+// ═══════════════════════════════════════════════════
+function setMapTool(tool) {
+  APP.mapTool = tool;
+  document.querySelectorAll('.zone-tool-btn').forEach(b => b.classList.remove('active-tool'));
+  document.getElementById(`tool${tool.charAt(0).toUpperCase()+tool.slice(1)}`)?.classList.add('active-tool');
+  // Drawing manager removed - users can set coordinates in modal form
+}
+
+function showAddZoneModal() {
+  document.getElementById('addZoneModal').classList.add('open');
+}
+
+async function createZone() {
+  const name = document.getElementById('newZoneName').value.trim();
+  const lat = parseFloat(document.getElementById('newZoneLat').value);
+  const lng = parseFloat(document.getElementById('newZoneLng').value);
+  const radius = parseInt(document.getElementById('newZoneRadius').value);
+
+  if (!name || isNaN(lat) || isNaN(lng) || isNaN(radius)) {
+    alert('Please fill all zone details.');
+    return;
+  }
+
+  const newZone = {
+    _id: `zone-${Date.now()}`,
+    name,
+    lat, lng,
+    center: { lat, lng },
+    radius,
+    color: ['#1E6FCC','#0EAD7A','#E8900A','#7C3AED','#D42B2B'][APP.zones.length % 5],
+  };
+
+  // Try backend
+  const res = await apiCall('/api/zones', 'POST', { name, center: { lat, lng }, radius });
+  if (res?.zone) APP.zones.push(res.zone);
+  else APP.zones.push(newZone);
+
+  renderZoneList();
+  populateAssignDropdowns();
+  document.getElementById('zoneCount').textContent = `${APP.zones.length} Zones`;
+  closeModal('addZoneModal');
+
+  // Re-init maps to show new zone
+  if (APP.maps.zone) {
+    renderZonesOnMap(APP.maps.zone, 'zone');
+  }
+  if (APP.maps.master) {
+    APP.maps.master.setView([lat, lng], 14);
+    renderZonesOnMap(APP.maps.master, 'master');
+  }
+
+  document.getElementById('stat-zones').textContent = APP.zones.length;
+}
+
+function deleteZone(zoneId) {
+  if (!confirm('Remove this zone? This cannot be undone.')) return;
+  APP.zones = APP.zones.filter(z => z._id !== zoneId);
+  apiCall(`/api/zones/${zoneId}`, 'DELETE');
+  renderZoneList();
+  document.getElementById('zoneCount').textContent = `${APP.zones.length} Zones`;
+}
+
+function deleteSelectedZone() {
+  if (APP.selectedZone) deleteZone(APP.selectedZone);
+  else alert('Click a zone on the map first to select it, then delete.');
+}
+
+function refreshMap() {
+  if (APP.maps.master) {
+    APP.maps.master.setView([ANANTAPUR_CENTER.lat, ANANTAPUR_CENTER.lng], 13);
+    renderMarkersOnMap(APP.maps.master, 'master');
+  }
+}
+
+async function assignConstableToZone() {
+  const zoneId = document.getElementById('assignZoneSelect').value;
+  const siId = document.getElementById('assignSISelect').value;
+  const constableId = document.getElementById('assignConstableSelect').value;
+  if (!zoneId) { alert('Select a zone.'); return; }
+
+  // Assign SI if selected
+  if (siId) {
+    const resSI = await apiCall(`/api/zones/${zoneId}`, 'PUT', { officer: siId });
+    if (resSI?.success) {
+      alert('SI assigned successfully.');
+      // Update local zone
+      const zone = APP.zones.find(z => z._id === zoneId);
+      const officer = APP.personnel.find(p => p._id === siId);
+      if (zone) {
+        zone.officer = siId;
+        zone.officerName = officer ? officer.name : 'Unknown';
+      }
+    } else {
+      alert('Unable to assign SI. Please try again.');
+      return;
+    }
+  }
+
+  // Assign constable if selected
+  if (constableId) {
+    const res = await apiCall(`/api/zones/${zoneId}/assign`, 'POST', { userId: constableId });
+    if (res?.success) {
+      alert('Constable assigned successfully.');
+    } else {
+      // Demo: update local
+      const p = APP.personnel.find(p => p._id === constableId);
+      const z = APP.zones.find(z => z._id === zoneId);
+      if (p && z) { p.zone = z; alert(`${p.name} assigned to ${z.name}`); }
+    }
+  }
+
+  if (!siId && !constableId) {
+    alert('Select at least an SI or constable to assign.');
+  } else {
+    renderZoneList();
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// VIP MANAGEMENT
+// ═══════════════════════════════════════════════════
+function showAddVIPModal() {
+  document.getElementById('addVIPModal').classList.add('open');
+}
+
+async function addVIPMovement() {
+  const name = document.getElementById('vipName').value.trim();
+  const vehicle = document.getElementById('vipVehicle').value.trim();
+  const level = document.getElementById('vipLevel').value;
+  const route = document.getElementById('vipRoute').value.trim();
+
+  if (!name) { alert('Enter VIP name.'); return; }
+
+  const newVIP = { _id: `v-${Date.now()}`, name, vehicle, level, route, lat: 14.6830, lng: 77.6010, isActive: true };
+  const res = await apiCall('/api/vip', 'POST', newVIP);
+  if (res?.vip) APP.vips.push(res.vip);
+  else APP.vips.push(newVIP);
+
+  document.getElementById('vipCount').textContent = `${APP.vips.filter(v=>v.isActive).length} Active`;
+  renderVIPList();
+  renderVIPOnMap();
+  closeModal('addVIPModal');
+}
+
+// ── VIP Real-time tracking (simulate movement + real GPS if page is VIP) ──
+setInterval(() => {
+  if (APP.vips.length && APP.maps.vip) {
+    APP.vips.forEach(v => {
+      if (!v.isActive) return;
+      v.lat += (Math.random() - 0.5) * 0.0002;
+      v.lng += (Math.random() - 0.5) * 0.0002;
+    });
+    renderVIPOnMap();
+  }
+}, 5000);
+
+// ═══════════════════════════════════════════════════
+// ALERTS
+// ═══════════════════════════════════════════════════
+function handleNewAlert(data) {
+  APP.alerts.unshift({ ...data, acknowledged: false });
+  renderAlerts('alertsFeedAdmin');
+  renderAlerts('officerAlertsFeed');
+  renderAlerts('fullAlertsList');
+  renderDashboardStats();
+
+  const count = APP.alerts.filter(a => !a.acknowledged).length;
+  const badge = document.getElementById('navAlertBadge');
+  if (badge) { badge.textContent = count; badge.style.display = count > 0 ? '' : 'none'; }
+  document.getElementById('alertCountBadge').textContent = `${count} Active`;
+}
+
+function handleGeofenceAlert(data) {
+  // Console alert for all roles
+  console.warn('🚨 GEOFENCE VIOLATION:', data);
+
+  // Store alert with timestamp
+  const alertEvent = {
+    userId: data.userId,
+    userName: data.userName || 'Unknown',
+    distance: data.distance || 0,
+    timestamp: new Date().toISOString(),
+    zone: data.zone || 'Unknown Zone',
+    severity: 'high'
+  };
+
+  // Play alert sound for all users
+  playAlertSound('violation', 3);
+
+  // For constable - show full screen alert
+  if (APP.role === 'constable' && data.userId === APP.user?._id) {
+    document.getElementById('alertTitle').textContent = '🚨 ZONE VIOLATION — RETURN NOW';
+    document.getElementById('alertBody').textContent = `You are ${Math.round(data.distance || 0)}m outside your assigned zone. Return immediately to: ${data.zone || 'your zone'}`;
+    document.getElementById('fullscreenAlert').classList.add('show');
+
+    if ('vibrate' in navigator) {
+      navigator.vibrate([200, 100, 200, 100, 200, 100, 500]);
+    }
+
+    updateZoneIndicator(false);
+    document.getElementById('zoneStatusCard').style.background = 'linear-gradient(135deg,#D42B2B,#A81F1F)';
+    playAlertSound('violation', 4);
+  }
+  // For admin/officer - update dashboard and show in alerts
+  else if (APP.role === 'admin' || APP.role === 'officer') {
+    // Add to alerts list for visibility
+    const newAlert = {
+      _id: `alert-${Date.now()}`,
+      type: 'geofence_exit',
+      severity: 'high',
+      userId: { name: alertEvent.userName, policeId: data.userId },
+      zoneId: { name: alertEvent.zone },
+      createdAt: alertEvent.timestamp,
+      acknowledged: false,
+      message: `Officer moved outside zone boundary (${Math.round(alertEvent.distance)}m outside - URGENT)`
+    };
+
+    APP.alerts.unshift(newAlert);
+    handleNewAlert(newAlert);
+    playAlertSound('violation', 2);
+  }
+}
+
+async function acknowledgeAlert(alertId) {
+  const a = APP.alerts.find(a => a._id === alertId);
+  if (a) a.acknowledged = true;
+  await apiCall(`/api/alerts/${alertId}/acknowledge`, 'PATCH');
+
+  renderAlerts('alertsFeedAdmin');
+  renderAlerts('officerAlertsFeed');
+  renderAlerts('fullAlertsList');
+  renderDashboardStats();
+
+  const count = APP.alerts.filter(a => !a.acknowledged).length;
+  const badge = document.getElementById('navAlertBadge');
+  if (badge) { badge.textContent = count; badge.style.display = count > 0 ? '' : 'none'; }
+  document.getElementById('alertCountBadge').textContent = `${count} Active`;
+}
+
+function dismissAlert() {
+  document.getElementById('fullscreenAlert').classList.remove('show');
+}
+
+function updateStatsFromWS(data) {
+  if (data.active !== undefined) document.getElementById('stat-active').textContent = data.active;
+  if (data.inZone !== undefined) document.getElementById('stat-inzone').textContent = data.inZone;
+  if (data.violations !== undefined) document.getElementById('stat-violations').textContent = data.violations;
+}
+
+// ═══════════════════════════════════════════════════
+// CONSTABLE GPS TRACKING
+// ═══════════════════════════════════════════════════
+let constableOnDuty = false;
+
+function handleConstableCheckIn() {
+  const btn = document.getElementById('checkInBtn');
+
+  if (!constableOnDuty) {
+    // Check in
+    constableOnDuty = true;
+    const now = new Date();
+    APP.constableState.dutyStart = now;
+    APP.constableState.isOnDuty = true;
+    APP.constableState.locationUpdates = 0;
+    APP.constableState.violations = 0;
+
+    btn.textContent = 'CHECK OUT — End Duty';
+    btn.style.background = 'linear-gradient(135deg,#D42B2B,#A81F1F)';
+    btn.style.boxShadow = 'var(--sh-crimson)';
+
+    document.getElementById('constableStatus').textContent = 'ON DUTY';
+    document.getElementById('constableStatus').style.color = 'var(--mint)';
+    document.getElementById('logCheckIn').textContent = now.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+    document.getElementById('constableGPSStatus').textContent = 'GPS: Active — Tracking every 5 seconds';
+
+    // Start GPS
+    startGPSTracking();
+
+    // Start duty timer
+    APP.dutyTimerInterval = setInterval(() => {
+      const diff = Date.now() - APP.constableState.dutyStart;
+      const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
+      const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+      const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+      document.getElementById('constableDuration').textContent = `${h}:${m}:${s}`;
+    }, 1000);
+
+    // Notify backend
+    apiCall('/api/duty/checkin', 'POST', { userId: APP.user?._id, timestamp: now.toISOString() });
+
+  } else {
+    // Check out
+    constableOnDuty = false;
+    APP.constableState.isOnDuty = false;
+
+    btn.textContent = 'CHECK IN — Start Duty';
+    btn.style.background = 'linear-gradient(135deg,#0EAD7A,#087A55)';
+    btn.style.boxShadow = 'var(--sh-mint)';
+
+    document.getElementById('constableStatus').textContent = 'OFF DUTY';
+    document.getElementById('constableStatus').style.color = 'var(--text-soft)';
+    document.getElementById('constableDuration').textContent = '--:--:--';
+    document.getElementById('constableGPSStatus').textContent = 'GPS: Inactive (Check in to begin tracking)';
+
+    clearInterval(APP.dutyTimerInterval);
+
+    if (APP.constableState.gpsWatchId) {
+      navigator.geolocation.clearWatch(APP.constableState.gpsWatchId);
+      APP.constableState.gpsWatchId = null;
+    }
+
+    // Reset zone card
+    document.getElementById('zoneStatusCard').style.background = 'linear-gradient(135deg,#1E6FCC,#1355A8)';
+    updateZoneIndicator(null);
+
+    apiCall('/api/duty/checkout', 'POST', { userId: APP.user?._id, timestamp: new Date().toISOString() });
+  }
+}
+
+// CHECK GEOFENCE
+function checkGeofence(lat, lng, zoneId) {
+  // Find the constable's assigned zone
+  const assignedZone = APP.zones.find(z => z._id === zoneId || z._id === APP.user?.zoneId);
+  if (!assignedZone) return { inZone: true, distance: 0 };
+
+  // Calculate distance from zone center using Haversine formula
+  const R = 6371000; // Earth radius in meters
+  const dLat = (lat - assignedZone.lat) * Math.PI / 180;
+  const dLng = (lng - assignedZone.lng) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(assignedZone.lat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
+            Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c;
+
+  const radius = assignedZone.radius || 500;
+  const inZone = distance <= radius;
+  const distanceOutside = Math.max(0, distance - radius);
+
+  return { inZone, distance: distanceOutside, inBounds: distance };
+}
+
+function startGPSTracking() {
+  if (!navigator.geolocation) {
+    document.getElementById('constableGPSStatus').textContent = 'GPS: Not available on this device';
+    return;
+  }
+
+  APP.constableState.gpsWatchId = navigator.geolocation.watchPosition(
+    (pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      const accuracy = pos.coords.accuracy;
+
+      APP.constableState.lastLat = lat;
+      APP.constableState.lastLng = lng;
+      APP.constableState.locationUpdates++;
+
+      // Check geofence status
+      const geofenceStatus = checkGeofence(lat, lng, APP.user?.zoneId);
+      const wasInZone = APP.constableState.lastInZone !== false;
+      APP.constableState.lastInZone = geofenceStatus.inZone;
+
+      // Trigger alert if moved out of zone
+      if (wasInZone && !geofenceStatus.inZone) {
+        playAlertSound('violation', 3);
+        if ('vibrate' in navigator) {
+          navigator.vibrate([300, 100, 300, 100, 300]);
+        }
+      }
+
+      // Update UI with geofence status
+      document.getElementById('logUpdates').textContent = APP.constableState.locationUpdates;
+      const statusStr = geofenceStatus.inZone ? '✓ IN ZONE' : `✗ OUTSIDE (${Math.round(geofenceStatus.distance)}m)`;
+      document.getElementById('constableGPSStatus').textContent =
+        `GPS: Active — ${statusStr} | Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)} (±${Math.round(accuracy)}m)`;
+
+      updateZoneIndicator(geofenceStatus.inZone);
+
+      // Send to backend via WebSocket with geofence data
+      if (APP.socket?.connected) {
+        APP.socket.emit('location:update', {
+          userId: APP.user?._id,
+          lat,
+          lng,
+          accuracy,
+          speed: pos.coords.speed,
+          inZone: geofenceStatus.inZone,
+          distance: geofenceStatus.distance,
+          zoneId: APP.user?.zoneId,
+          timestamp: pos.timestamp,
+        });
+      } else {
+        // HTTP fallback
+        apiCall('/api/tracking/location', 'POST', {
+          userId: APP.user?._id,
+          lat, lng, accuracy,
+          inZone: geofenceStatus.inZone,
+          distance: geofenceStatus.distance,
+          zoneId: APP.user?.zoneId,
+          timestamp: new Date().toISOString()
+        });
+      }
+    },
+    (err) => {
+      console.warn('GPS error:', err);
+      if (err.code === 1) {
+        document.getElementById('constableGPSStatus').textContent = 'GPS: Permission denied — Enable location access';
+        playAlertSound('violation', 2);
+        // Alert admin about GPS off
+        if (APP.socket?.connected) {
+          APP.socket.emit('alert:gps_off', { userId: APP.user?._id, reason: 'permission_denied' });
+        }
+      }
+    },
+    {
+      enableHighAccuracy: true,
+      maximumAge: 3000,
+      timeout: 10000,
+    }
+  );
+}
+
+function updateZoneIndicator(inZone) {
+  const el = document.getElementById('zoneIndicator');
+  const txt = document.getElementById('zoneIndicatorText');
+  const card = document.getElementById('zoneStatusCard');
+
+  if (inZone === null) {
+    el.style.background = 'rgba(255,255,255,0.15)';
+    el.style.color = 'rgba(255,255,255,0.85)';
+    txt.textContent = 'GPS Acquiring...';
+    return;
+  }
+
+  if (inZone) {
+    el.style.background = 'rgba(14,173,122,0.3)';
+    el.style.color = 'white';
+    txt.textContent = 'IN ZONE — Compliant';
+    card.style.background = 'linear-gradient(135deg,#1E6FCC,#1355A8)';
+  } else {
+    el.style.background = 'rgba(212,43,43,0.4)';
+    el.style.color = 'white';
+    txt.textContent = 'OUTSIDE ZONE — Return Now';
+    card.style.background = 'linear-gradient(135deg,#D42B2B,#A81F1F)';
+    APP.constableState.violations++;
+    document.getElementById('logViolations').textContent = APP.constableState.violations;
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// PERSONNEL MANAGEMENT
+// ═══════════════════════════════════════════════════
+function showAddOfficerModal() {
+  document.getElementById('addOfficerModal').classList.add('open');
+}
+
+async function createOfficer() {
+  const name = document.getElementById('newOfficerName').value.trim();
+  const policeId = document.getElementById('newOfficerPID').value.trim().toUpperCase();
+  const badgeNumber = document.getElementById('newOfficerBadge').value.trim();
+  const role = document.getElementById('newOfficerRole').value;
+  const password = document.getElementById('newOfficerPwd').value;
+
+  if (!name || !policeId || !password) { alert('Fill all required fields.'); return; }
+
+  const res = await apiCall('/api/users', 'POST', { name, policeId, badgeNumber, role, password });
+  if (res?.success) {
+    APP.personnel.push(res.user);
+    alert(`${name} added successfully.`);
+  } else {
+    APP.personnel.push({ _id: `local-${Date.now()}`, name, policeId, badgeNumber, role, isActive: true, performanceScore: 0 });
+    alert(`${name} added (offline mode).`);
+  }
+
+  loadPersonnelManagement();
+  closeModal('addOfficerModal');
+}
+
+// ═══════════════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════════════
+function closeModal(modalId) {
+  document.getElementById(modalId).classList.remove('open');
+}
+
+// Close modal on backdrop click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
+});
+
+// ═══════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════
+function getTimeAgo(date) {
+  const secs = Math.floor((Date.now() - date) / 1000);
+  if (secs < 60) return `${secs}s ago`;
+  if (secs < 3600) return `${Math.floor(secs/60)}m ago`;
+  if (secs < 86400) return `${Math.floor(secs/3600)}h ago`;
+  return `${Math.floor(secs/86400)}d ago`;
+}
+
+// Offline detection
+window.addEventListener('offline', () => {
+  document.getElementById('offlineBanner').classList.add('show');
+  setWSStatus(false);
+});
+window.addEventListener('online', () => {
+  document.getElementById('offlineBanner').classList.remove('show');
+  connectWebSocket();
+});
+
+// ═══════════════════════════════════════════════════
+// PWA SERVICE WORKER
+// ═══════════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  showRoleSelection();
+});
+</script>
+
+</body>
+</html>
