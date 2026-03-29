@@ -831,17 +831,18 @@ async function seedDatabase() {
 // ═══════════════════════════════════════════════════════════════
 // START SERVER
 // ═══════════════════════════════════════════════════════════════
-mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(MONGO_URI)
   .then(async () => {
-    console.log('MongoDB connected:', MONGO_URI);
+    console.log('MongoDB connected');
 
     const adminExists = await User.exists({ role: 'admin', isActive: true });
 
     if (SEED_DEMO_DATA) {
-      console.log('⚙️ Demo data seeding enabled (SEED_DEMO_DATA=true).');
+      console.log('⚙️ Demo data seeding enabled');
       await seedDatabase();
     } else {
-      console.log('⚙️ Demo data seeding disabled (SEED_DEMO_DATA=false). Checking admin account.');
+      console.log('⚙️ Checking admin account');
+
       if (!adminExists) {
         if (process.env.ADMIN_POLICEID && process.env.ADMIN_PASSWORD) {
           await User.create({
@@ -851,48 +852,34 @@ mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
             role: 'admin',
             password: process.env.ADMIN_PASSWORD,
           });
-          console.log('✓ Admin account created from environment variables:', process.env.ADMIN_POLICEID);
+
+          console.log('✓ Admin created from ENV');
         } else {
-          console.warn('⚠️ No admin account found and no ADMIN_ env vars are set. Seeding default credentials...');
+          console.warn('⚠️ No admin found → seeding default');
           await seedDatabase();
         }
       }
     }
-            role: 'admin',
-            password: process.env.ADMIN_PASSWORD,
-          });
-          console.log(`⚙️ Admin user auto-created from env: ${process.env.ADMIN_POLICEID}`);
-        } else {
-          console.warn('⚠ No admin user found. Create one manually before using the app.');
-          console.warn('ℹ️ Set ADMIN_POLICEID and ADMIN_PASSWORD env vars to auto-create an admin on startup.');
-        }
-      }
-    }
 
     server.listen(PORT, () => {
-      console.log(`\nBandobusth.AI backend running on port ${PORT}`);
-      console.log(`Frontend: http://localhost:${PORT}`);
-      console.log(`Health: http://localhost:${PORT}/health`);
-      if (SEED_DEMO_DATA) {
-        console.log('\nDemo Credentials:');
-        console.log('  Admin:    AP-HEAD-0001 / admin123');
-        console.log('  Officer:  AP-OFF-0012 / officer123');
-        console.log('  Constable: AP-CONST-0101 / const123\n');
-      } else {
-        console.log('⚙️ Demo credentials are disabled; use your production users.');
-      }
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`🌐 URL: http://localhost:${PORT}`);
+      console.log(`💚 Health: http://localhost:${PORT}/health`);
     });
   })
   .catch(err => {
-    console.error('MongoDB connection failed:', err.message);
-    console.log('\nRunning WITHOUT database (demo mode)...');
+    console.error('❌ MongoDB connection failed:', err.message);
+
     server.listen(PORT, () => {
-      console.log(`Bandobusth.AI running on port ${PORT} (demo mode)`);
+      console.log(`⚠️ Running without DB on port ${PORT}`);
     });
   });
 
 process.on('SIGTERM', () => {
-  server.close(() => { mongoose.disconnect(); process.exit(0); });
+  server.close(() => {
+    mongoose.disconnect();
+    process.exit(0);
+  });
 });
 
 module.exports = { app, server, io };
